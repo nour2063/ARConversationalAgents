@@ -84,5 +84,8 @@ crashlytics-build.properties
 /[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Core/Property Providers
 /[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Core/Property Providers.meta
 
-#Jetbrains
+# Jetbrains
 /.idea/
+
+# OpenAI Secret Key
+OpenAIConfiguration.asset
