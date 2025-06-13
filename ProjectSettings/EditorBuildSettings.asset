@@ -17,9 +17,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Samples/5 ImageLLM/ImageLLM.unity
     guid: e315df11792f04348a6913e0c2feac5f
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/LLMTest.unity
     guid: 2c12d45c56ce94dc5877b89915808c92
+  - enabled: 1
+    path: Assets/Scenes/TTSTest.unity
+    guid: ae74c3006988c41faa85d7f7095ac25d
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 5b53f0c4e35294a27b8d5ca10ded94a3, type: 2}
