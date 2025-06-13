@@ -8,12 +8,18 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/ObjectDetectionTest.unity
     guid: ab55f4cae22b94e83be34faaab7a5055
   - enabled: 0
     path: Assets/Samples/2 ObjectDetection/ObjectDetection.unity
     guid: 59f22156e8aa44aeead8e1331b47c7aa
+  - enabled: 0
+    path: Assets/Samples/5 ImageLLM/ImageLLM.unity
+    guid: e315df11792f04348a6913e0c2feac5f
+  - enabled: 1
+    path: Assets/Scenes/LLMTest.unity
+    guid: 2c12d45c56ce94dc5877b89915808c92
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 5b53f0c4e35294a27b8d5ca10ded94a3, type: 2}

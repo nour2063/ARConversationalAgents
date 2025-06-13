@@ -2651,7 +2651,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 967652833}
   m_HandleRect: {fileID: 967652832}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -3461,7 +3461,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e933e81d3c20c74ea6fdc708a67e3a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useRecommendedMSAALevel: 1
   _monoscopic: 0
   _sharpenType: 0
   _enableDynamicResolution: 1
@@ -3872,6 +3871,10 @@ PrefabInstance:
       propertyPath: ttsManager
       value: 
       objectReference: {fileID: 710117856915307813}
+    - target: {fileID: 798435756079333793, guid: 0dc6a13ceb442495eb5d0119a04b4297, type: 3}
+      propertyPath: instructions
+      value: Be straight to the point.
+      objectReference: {fileID: 0}
     - target: {fileID: 798435756079333793, guid: 0dc6a13ceb442495eb5d0119a04b4297, type: 3}
       propertyPath: onRequestSent.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
