@@ -3,11 +3,11 @@ using OpenAI;
 using OpenAI.Chat;
 using OpenAI.Models;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Meta.WitAi.TTS.Utilities;
 using Oculus.Voice.Dictation;
 using PassthroughCameraSamples;
 using TMPro;
+using Unity.VisualScripting;
 
 public class PassthroughCameraTTS : MonoBehaviour
 {
@@ -20,7 +20,8 @@ public class PassthroughCameraTTS : MonoBehaviour
     public TTSSpeaker speaker;
     
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
-    [SerializeField] private int chatEndpointDelay = 1000;
+    
+    private bool _resultLocked = false;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -30,7 +31,7 @@ public class PassthroughCameraTTS : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (webcamManager.WebCamTexture != null)
+        if (!ReferenceEquals(webcamManager.WebCamTexture, null))
         {
             if (OVRInput.GetDown(OVRInput.RawButton.A))
             {
@@ -42,6 +43,9 @@ public class PassthroughCameraTTS : MonoBehaviour
 
     public async void SubmitImage()
     {
+        if (_resultLocked) return;
+        _resultLocked = true;
+        
         var api = new OpenAIClient(configuration);
         
         var messages = new List<Message>();
@@ -59,24 +63,24 @@ public class PassthroughCameraTTS : MonoBehaviour
         messages.Add(systemMessage);
         messages.Add(imageMessage);
         
-        resultText.text = "before chat request...";
         var chatRequest = new ChatRequest(messages, model: Model.GPT4o);
         
         resultText.text = "making chat request...";
         var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
         
-        await Task.Delay(chatEndpointDelay); // making sure that the result is complete
         resultText.text = result.FirstChoice;
         speaker.Speak(result.FirstChoice);
     }
 
     public void CaptureImage()
     {
+        _resultLocked = false;
+        
         resultText.text = "Capturing...";
         int width = webcamManager.WebCamTexture.width;
         int height = webcamManager.WebCamTexture.height;
 
-        if (image == null)
+        if (ReferenceEquals(image, null))
         {
             image = new Texture2D(width, height);
         }
