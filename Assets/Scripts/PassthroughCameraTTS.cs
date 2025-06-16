@@ -3,6 +3,8 @@ using OpenAI;
 using OpenAI.Chat;
 using OpenAI.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Meta.WitAi.TTS.Utilities;
 using Oculus.Voice.Dictation;
 using PassthroughCameraSamples;
 using TMPro;
@@ -15,8 +17,10 @@ public class PassthroughCameraTTS : MonoBehaviour
     public TextMeshProUGUI resultText;
     public AppDictationExperience dictation;
     public TextMeshProUGUI dictationText;
+    public TTSSpeaker speaker;
     
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
+    [SerializeField] private int chatEndpointDelay = 1000;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -61,7 +65,9 @@ public class PassthroughCameraTTS : MonoBehaviour
         resultText.text = "making chat request...";
         var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
         
+        await Task.Delay(chatEndpointDelay); // making sure that the result is complete
         resultText.text = result.FirstChoice;
+        speaker.Speak(result.FirstChoice);
     }
 
     public void CaptureImage()
