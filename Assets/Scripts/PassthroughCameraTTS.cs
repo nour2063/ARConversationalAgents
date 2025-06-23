@@ -3,6 +3,7 @@ using OpenAI;
 using OpenAI.Chat;
 using OpenAI.Models;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Meta.WitAi.TTS.Utilities;
 using Oculus.Voice.Dictation;
 using PassthroughCameraSamples;
@@ -11,21 +12,61 @@ using Unity.VisualScripting;
 
 public class PassthroughCameraTTS : MonoBehaviour
 {
+    [Header("References")]
     public WebCamTextureManager webcamManager;
     public OpenAIConfiguration configuration;
-    public Texture2D image;
-    public TextMeshProUGUI resultText;
     public AppDictationExperience dictation;
-    public TextMeshProUGUI dictationText;
     public TTSSpeaker speaker;
     
+    [Header("Vision Model")]
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
+    
+    [Header("UI")]
+    [SerializeField] private TextMeshProUGUI dictationText;
+    [SerializeField] private TextMeshProUGUI resultText;
+    
+    [Header("Debug Image")]
+    [SerializeField] private Texture2D image;
     
     private bool _resultLocked = false;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        if (webcamManager == null)
+        {
+            Debug.LogError("Webcam manager is not set in PassthroughCameraDescription");
+        }
+
+        if (configuration == null)
+        {
+            Debug.LogError("OpenAI Configuration is not set in PassthroughCameraDescription");
+        }
+
+        if (dictation == null)
+        {
+            Debug.LogError("Dictation manager is not set in PassthroughCameraDescription");
+        }
+
+        if (speaker == null)
+        {
+            Debug.LogError("Speaker is not set in PassthroughCameraDescription");
+        }
+
+        if (dictationText == null)
+        {
+            Debug.LogError("DictationText UI is not set in PassthroughCameraDescription");
+        }
+
+        if (resultText == null)
+        {
+            Debug.LogError("ResultText UI is not set in PassthroughCameraDescription");
+        }
+
+        if (image != null)
+        {
+            SubmitImage();
+        }
     }
 
     // Update is called once per frame

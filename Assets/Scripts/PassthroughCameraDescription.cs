@@ -8,18 +8,40 @@ using TMPro;
 
 public class PassthroughCameraDescription : MonoBehaviour
 {
+    [Header("References")]
     public WebCamTextureManager webcamManager;
     public OpenAIConfiguration configuration;
-    public Texture2D image;
     public TextMeshProUGUI resultText;
     
+    [Header("UI")]
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
     [SerializeField] private string imagePrompt = "What's in this image?";
+    
+    [Header("Debug Image")]
+    [SerializeField] private Texture2D image;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        if (webcamManager == null)
+        {
+            Debug.LogError("Webcam manager is not set in PassthroughCameraDescription");
+        }
+
+        if (configuration == null)
+        {
+            Debug.LogError("OpenAI Configuration is not set in PassthroughCameraDescription");
+        }
+
+        if (resultText == null)
+        {
+            Debug.LogError("ResultText UI is not set in PassthroughCameraDescription");
+        }
+
+        if (image != null)
+        {
+            SubmitImage();
+        }
     }
 
     // Update is called once per frame

@@ -6,13 +6,14 @@ using Oculus.Voice.Dictation;
 using PassthroughCameraSamples;
 using TMPro;
 using ollama;
+using UnityEditor.Experimental.GraphView;
 
 public class PassthroughCameraLocal : MonoBehaviour
 {
+    [Header("References")] 
     public WebCamTextureManager webcamManager;
     public AppDictationExperience dictation;
     public TTSSpeaker speaker;
-    public Texture2D image;
 
     [Header("Vision Model")] 
     [SerializeField] private string serverIP = "http://localhost:11434/";
@@ -22,6 +23,9 @@ public class PassthroughCameraLocal : MonoBehaviour
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI resultText;
     [SerializeField] private TextMeshProUGUI dictationText;
+    
+    [Header("Debug Image")]
+    [SerializeField] private Texture2D image;
     
     private bool _resultLocked = false;
     
@@ -50,7 +54,35 @@ public class PassthroughCameraLocal : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public async void Start()
     {
-        // SubmitImage();
+        if (webcamManager == null)
+        {
+            Debug.LogError("Webcam manager not set in PassthroughCameraLocal");
+        }
+
+        if (dictation == null)
+        {
+            Debug.LogError("Dictation manager not set in PassthroughCameraLocal");
+        }
+
+        if (speaker == null)
+        {
+            Debug.LogError("Speaker not set in PassthroughCameraLocal");
+        }
+
+        if (dictationText == null)
+        {
+            Debug.LogError("DictationText UI not set in PassthroughCameraLocal");
+        }
+
+        if (resultText == null)
+        {
+            Debug.LogError("ResultText UI not set in PassthroughCameraLocal");
+        }
+
+        if (image != null)
+        {
+            SubmitImage();
+        } 
         var response = await Ollama.Generate(visionModel, "Hey there!");
         resultText.text = response;
     }
@@ -111,5 +143,24 @@ public class PassthroughCameraLocal : MonoBehaviour
         
         image.SetPixels32(pixels);
         image.Apply();
+
+        image = ResizeTexture(image, 256, 256);
     }
+    
+    private Texture2D ResizeTexture(Texture2D source, int newWidth, int newHeight)
+    {
+        RenderTexture rt = RenderTexture.GetTemporary(newWidth, newHeight);
+        Graphics.Blit(source, rt);
+        RenderTexture previous = RenderTexture.active;
+        RenderTexture.active = rt;
+
+        Texture2D newTex = new Texture2D(newWidth, newHeight, TextureFormat.RGB24, false);
+        newTex.ReadPixels(new Rect(0, 0, newWidth, newHeight), 0, 0);
+        newTex.Apply();
+
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(rt);
+        return newTex;
+    }
+
 }
