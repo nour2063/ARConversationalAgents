@@ -13,12 +13,12 @@ using Unity.VisualScripting;
 public class PassthroughCameraTTS : MonoBehaviour
 {
     [Header("References")]
-    public WebCamTextureManager webcamManager;
-    public OpenAIConfiguration configuration;
-    public AppDictationExperience dictation;
-    public TTSSpeaker speaker;
+    [SerializeField] private WebCamTextureManager webcamManager;
+    [SerializeField] private OpenAIConfiguration configuration;
+    [SerializeField] private TTSSpeaker speaker;
     
     [Header("Vision Model")]
+    [TextArea(10,10)]
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
     
     [Header("UI")]
@@ -43,11 +43,6 @@ public class PassthroughCameraTTS : MonoBehaviour
             Debug.LogError("OpenAI Configuration is not set in PassthroughCameraDescription");
         }
 
-        if (dictation == null)
-        {
-            Debug.LogError("Dictation manager is not set in PassthroughCameraDescription");
-        }
-
         if (speaker == null)
         {
             Debug.LogError("Speaker is not set in PassthroughCameraDescription");
@@ -62,30 +57,34 @@ public class PassthroughCameraTTS : MonoBehaviour
         {
             Debug.LogError("ResultText UI is not set in PassthroughCameraDescription");
         }
-
+        
+        // Debug
         if (image != null)
         {
-            SubmitImage();
+            SubmitImage("What do you think of this?");
         }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!ReferenceEquals(webcamManager.WebCamTexture, null))
-        {
-            if (OVRInput.GetDown(OVRInput.RawButton.A))
-            {
-                dictation.Activate();
-                CaptureImage();
-            }
-        }
+        // Debug activation
+        // if (!ReferenceEquals(webcamManager.WebCamTexture, null))
+        // {
+        //     if (OVRInput.GetDown(OVRInput.RawButton.A))
+        //     {
+        //         dictation.Activate();
+        //         CaptureImage();
+        //     }
+        // }
     }
 
-    public async void SubmitImage()
+    public async void SubmitImage(string prompt)
     {
         if (_resultLocked) return;
         _resultLocked = true;
+        
+        resultText.text = "making chat request...";
         
         var api = new OpenAIClient(configuration);
         
@@ -93,10 +92,9 @@ public class PassthroughCameraTTS : MonoBehaviour
         Message systemMessage = new Message(Role.System, initialPrompt);
         
         List<Content> imageContents = new List<Content>();
-        string textContent = dictationText.text;
         Texture2D imageContent = image;
         
-        imageContents.Add(textContent);
+        imageContents.Add(prompt);
         imageContents.Add(imageContent);
 
         Message imageMessage = new Message(Role.User, imageContents);
@@ -105,12 +103,10 @@ public class PassthroughCameraTTS : MonoBehaviour
         messages.Add(imageMessage);
         
         var chatRequest = new ChatRequest(messages, model: Model.GPT4o);
-        
-        resultText.text = "making chat request...";
         var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
         
         resultText.text = result.FirstChoice;
-        speaker.Speak(result.FirstChoice);
+        ParseResponse(result.FirstChoice);
     }
 
     public void CaptureImage()
@@ -131,5 +127,26 @@ public class PassthroughCameraTTS : MonoBehaviour
         
         image.SetPixels32(pixels);
         image.Apply();
+    }
+
+    private void ParseResponse(string text)
+    {
+        Debug.Log("parsing response...");
+        
+        const string pattern = @"^\[\((\d+\.?\d*),\s*(\d+\.?\d*),\s*(\d+\.?\d*)\),\s*""([^""]*)""\]$";
+        var match = Regex.Match(text, pattern);
+
+        if (match.Success)
+        {
+            var pleasure = float.Parse(match.Groups[1].Value);
+            var arousal = float.Parse(match.Groups[2].Value);
+            var dominance = float.Parse(match.Groups[3].Value);
+            var message = match.Groups[4].Value;
+            
+            (float, float, float) emotionState = (pleasure, arousal, dominance);
+            Debug.Log(emotionState);
+            
+            speaker.Speak(message);
+        }
     }
 }

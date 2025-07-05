@@ -9,9 +9,9 @@ using TMPro;
 public class PassthroughCameraDescription : MonoBehaviour
 {
     [Header("References")]
-    public WebCamTextureManager webcamManager;
-    public OpenAIConfiguration configuration;
-    public TextMeshProUGUI resultText;
+    [SerializeField] private WebCamTextureManager webcamManager;
+    [SerializeField] private OpenAIConfiguration configuration;
+    [SerializeField] private TextMeshProUGUI resultText;
     
     [Header("UI")]
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";

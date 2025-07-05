@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class AudioController : MonoBehaviour
 {
-    public AudioSource audioSource;
-    public AudioClip startSound;
-    public AudioClip endSound;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip startSound;
+    [SerializeField] private AudioClip endSound;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

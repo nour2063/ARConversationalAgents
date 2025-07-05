@@ -10,9 +10,9 @@ using ollama;
 public class PassthroughCameraLocal : MonoBehaviour
 {
     [Header("References")] 
-    public WebCamTextureManager webcamManager;
-    public AppDictationExperience dictation;
-    public TTSSpeaker speaker;
+    [SerializeField] private WebCamTextureManager webcamManager;
+    [SerializeField] private AppDictationExperience dictation;
+    [SerializeField] private TTSSpeaker speaker;
 
     [Header("Vision Model")] 
     [SerializeField] private string serverIP = "http://localhost:11434/";

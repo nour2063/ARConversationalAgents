@@ -12,27 +12,44 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae5a46bda3295124c99b0e6537ac7252, type: 3}
   m_Name: WitConfiguration
   m_EditorClassIdentifier: 
-  _clientAccessToken: OFJNEMAWFVYKJYAWAETVWR2ODBAXRCAW
+  _clientAccessToken: QDC6ULEROK5O4N7Q7356GO32JQ5CFNSU
   editorVersionTag: 
   buildVersionTag: 
   _appInfo:
-    name: conversational_agents
-    id: 1348478069582335
+    name: talking_fridge
+    id: 1956280398447122
     lang: en
     isPrivate: 1
-    createdAt: 2025-06-13T05:30:09-0700
+    createdAt: 2025-07-02T03:24:15-0700
     trainingStatus: 1
-    lastTrainDuration: 0
-    lastTrainedAt: 1969-12-31T16:00:00-0800
-    nextTrainAt: 1969-12-31T16:00:00-0800
+    lastTrainDuration: 52
+    lastTrainedAt: 2025-07-02T03:30:36-0700
+    nextTrainAt: 2025-07-02T03:29:44-0700
     intents:
-    - id: 1077292507648809
-      name: wit$confirmation
-      entities: []
-    - id: 1369326344361386
-      name: wit$negation
-      entities: []
-    entities: []
+    - id: 1383445419544537
+      name: wake_word
+      entities:
+      - name: wake_word:wake_word
+        id: 1901141134064377
+    entities:
+    - name: wake_word
+      id: 1408017913658003
+      lookups:
+      - free-text
+      - keywords
+      roles:
+      - name: wake_word
+        id: 1901141134064377
+      keywords:
+      - keyword: hey fridge
+        synonyms:
+        - ey fridge
+        - fridge
+        - fridge listen
+        - hey fridge
+        - hey ridge
+        - hi fridge
+        - yo fridge
     traits: []
     versionTags: []
     voices:
