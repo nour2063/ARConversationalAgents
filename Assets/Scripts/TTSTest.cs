@@ -9,8 +9,7 @@ public class TTSTest : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        // Debug
-        // speaker.Speak(initialSpeech);
+        speaker.Speak(initialSpeech);
     }
 
     // Update is called once per frame

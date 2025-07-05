@@ -19,7 +19,6 @@ public class PassthroughCameraTTS : MonoBehaviour
     public TTSSpeaker speaker;
     
     [Header("Vision Model")]
-    [TextArea(10,10)]
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
     
     [Header("UI")]
@@ -63,29 +62,24 @@ public class PassthroughCameraTTS : MonoBehaviour
         {
             Debug.LogError("ResultText UI is not set in PassthroughCameraDescription");
         }
-        
-        // Debug
+
         if (image != null)
         {
             SubmitImage();
         }
-        
-        // Hands-free activation
-        // dictation.Activate();
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Debug activation
-        // if (!ReferenceEquals(webcamManager.WebCamTexture, null))
-        // {
-        //     if (OVRInput.GetDown(OVRInput.RawButton.A))
-        //     {
-        //         dictation.Activate();
-        //         CaptureImage();
-        //     }
-        // }
+        if (!ReferenceEquals(webcamManager.WebCamTexture, null))
+        {
+            if (OVRInput.GetDown(OVRInput.RawButton.A))
+            {
+                dictation.Activate();
+                CaptureImage();
+            }
+        }
     }
 
     public async void SubmitImage()

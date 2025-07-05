@@ -12,44 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae5a46bda3295124c99b0e6537ac7252, type: 3}
   m_Name: WitConfiguration
   m_EditorClassIdentifier: 
-  _clientAccessToken: QDC6ULEROK5O4N7Q7356GO32JQ5CFNSU
+  _clientAccessToken: OFJNEMAWFVYKJYAWAETVWR2ODBAXRCAW
   editorVersionTag: 
   buildVersionTag: 
   _appInfo:
-    name: talking_fridge
-    id: 1956280398447122
+    name: conversational_agents
+    id: 1348478069582335
     lang: en
     isPrivate: 1
-    createdAt: 2025-07-02T03:24:15-0700
+    createdAt: 2025-06-13T05:30:09-0700
     trainingStatus: 1
-    lastTrainDuration: 52
-    lastTrainedAt: 2025-07-02T03:30:36-0700
-    nextTrainAt: 2025-07-02T03:29:44-0700
+    lastTrainDuration: 0
+    lastTrainedAt: 1969-12-31T16:00:00-0800
+    nextTrainAt: 1969-12-31T16:00:00-0800
     intents:
-    - id: 1383445419544537
-      name: wake_word
-      entities:
-      - name: wake_word:wake_word
-        id: 1901141134064377
-    entities:
-    - name: wake_word
-      id: 1408017913658003
-      lookups:
-      - free-text
-      - keywords
-      roles:
-      - name: wake_word
-        id: 1901141134064377
-      keywords:
-      - keyword: hey fridge
-        synonyms:
-        - ey fridge
-        - fridge
-        - fridge listen
-        - hey fridge
-        - hey ridge
-        - hi fridge
-        - yo fridge
+    - id: 1077292507648809
+      name: wit$confirmation
+      entities: []
+    - id: 1369326344361386
+      name: wit$negation
+      entities: []
+    entities: []
     traits: []
     versionTags: []
     voices:
@@ -559,8 +542,8 @@ MonoBehaviour:
       - phoneme_events
       - word_events
   _configData:
-  - {fileID: 4866253146966271120}
-  _configurationId: 8e4dbc05-c21d-4a43-9c7a-ddca184847a0
+  - {fileID: 2934628237139425049}
+  _configurationId: 671a9fef-8fc8-410b-ad48-21d21e3a4427
   _requestType: 0
   _requestTimeoutMs: 10000
   endpointConfiguration:
@@ -577,10 +560,12 @@ MonoBehaviour:
   isDemoOnly: 0
   useIntentAttributes: 1
   useConduit: 1
-  _manifestLocalPath: ConduitManifest-851cdfe3-061d-4dce-8318-d66ed19debd9.json
-  excludedAssemblies: []
+  _manifestLocalPath: ConduitManifest-dbc45e45-2618-4467-8813-d59845ab0c37.json
+  excludedAssemblies:
+  - Oculus.Voice.Demo, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  - Meta.WitAi.Samples, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
   relaxedResolution: 0
---- !u!114 &4866253146966271120
+--- !u!114 &2934628237139425049
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
