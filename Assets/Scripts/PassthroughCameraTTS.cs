@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using OpenAI;
 using OpenAI.Chat;
@@ -18,12 +19,25 @@ public class PassthroughCameraTTS : MonoBehaviour
     [SerializeField] private TTSSpeaker speaker;
     
     [Header("Vision Model")]
-    [TextArea(10,10)]
+    [TextArea(30,10)]
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
     
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI dictationText;
     [SerializeField] private TextMeshProUGUI resultText;
+
+    [System.Serializable]
+    public class EmotionalAudioBurstData
+    {
+        public List<AudioClip> neutralClips = new List<AudioClip>();
+        public List<AudioClip> fearClips = new List<AudioClip>();
+        public List<AudioClip> happinessClips = new List<AudioClip>();
+        public List<AudioClip> sadnessClips = new List<AudioClip>();
+    }
+
+    [Header("Emotional Audio Bursts")]
+    [SerializeField] private AudioSource audioOutput;
+    [SerializeField] private EmotionalAudioBurstData audioData = new EmotionalAudioBurstData();
     
     [Header("Debug Image")]
     [SerializeField] private Texture2D image;
@@ -132,6 +146,7 @@ public class PassthroughCameraTTS : MonoBehaviour
     private void ParseResponse(string text)
     {
         Debug.Log("parsing response...");
+        var randomIndex = UnityEngine.Random.Range(0, 9); 
         
         const string pattern = @"^\[\((\d+\.?\d*),\s*(\d+\.?\d*),\s*(\d+\.?\d*)\),\s*""([^""]*)""\]$";
         var match = Regex.Match(text, pattern);
@@ -141,10 +156,29 @@ public class PassthroughCameraTTS : MonoBehaviour
             var pleasure = float.Parse(match.Groups[1].Value);
             var arousal = float.Parse(match.Groups[2].Value);
             var dominance = float.Parse(match.Groups[3].Value);
+            
             var message = match.Groups[4].Value;
             
-            (float, float, float) emotionState = (pleasure, arousal, dominance);
-            Debug.Log(emotionState);
+            var emotionState = ((int)Math.Round(pleasure), (int)Math.Round(arousal), (int)Math.Round(dominance));
+            switch (emotionState)
+            {
+                case (0, 0, 0):
+                    audioOutput.PlayOneShot(audioData.sadnessClips[randomIndex]);
+                    break;
+                case (1, 0, 0):
+                case (1, 1, 0):
+                case (1, 1, 1):
+                    audioOutput.PlayOneShot(audioData.happinessClips[randomIndex]);
+                    break;
+                case (0, 0, 1): 
+                case (1, 0, 1):
+                case (0, 1, 1):
+                    audioOutput.PlayOneShot(audioData.neutralClips[randomIndex]);
+                    break;
+                case (0, 1, 0):
+                    audioOutput.PlayOneShot(audioData.fearClips[randomIndex]);
+                    break;
+            }
             
             speaker.Speak(message);
         }

@@ -20,7 +20,7 @@ public class VoiceManager : MonoBehaviour
 
     private bool _voiceCommandReady;
 
-    private void Awake()
+    private void Start()
     {
         appVoiceExperience.VoiceEvents.OnRequestCompleted.AddListener(ReactivateVoice);
         appVoiceExperience.VoiceEvents.OnPartialTranscription.AddListener(OnPartialTranscription);
@@ -31,8 +31,9 @@ public class VoiceManager : MonoBehaviour
         {
             onMultiValueEvent.AddListener(WakeWordDetected);
         }
-
-        appVoiceExperience.Activate();
+        
+        // Requires wake word utterance for initial activation
+        appVoiceExperience.Activate("Hey fridge!");
     }
 
     private void OnDestroy()
@@ -67,7 +68,7 @@ public class VoiceManager : MonoBehaviour
         if (!_voiceCommandReady) return;
         _voiceCommandReady = false;
         Debug.Log(transcription);
-        ttsManager.SubmitImage(transcription);
         completeTranscription?.Invoke(transcription);
+        ttsManager.SubmitImage(transcription);
     }
 }
