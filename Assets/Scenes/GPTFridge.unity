@@ -400,6 +400,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 2003447282}
+        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
+        m_MethodName: PlayOneShot
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 8300000, guid: 3574763498d69462cb686f7dca316111, type: 3}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.AudioClip, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   completeTranscription:
     m_PersistentCalls:
       m_Calls:
@@ -432,12 +444,12 @@ MonoBehaviour:
   intent: wake_word
   confidenceThreshold: 0.6
   valueMatchers:
-  - path: entities.wake_word:wake_word[0].name
+  - path: entities.wake_word:wake_word[0].value
     witValueReference: {fileID: 0}
     contentRequired: 1
-    matchMethod: 0
+    matchMethod: 1
     comparisonMethod: 0
-    matchValue: 
+    matchValue: hey fridge
     floatingPointComparisonTolerance: 0.00009999999747378752
     allowConfidenceOverlap: 0
     confidenceRanges: []
@@ -859,7 +871,6 @@ MonoBehaviour:
     examples of responses:\n\n[(0.5, 0.5, 0.5), \"I'm sorry, I cannot help you with
     that\"]\n[(0.9, 0.8, 0.1), \"Those tomatoes look fresh! What are you thinking
     of making?\"]\n[(0.2, 0.4, 0.1), \"That cake looks yummy I suppose...\"]\n"
-  dictationText: {fileID: 1861760733}
   resultText: {fileID: 2095224737}
   audioOutput: {fileID: 2003447282}
   audioData:
@@ -2780,7 +2791,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 0.4
+  m_Volume: 0.1
   m_Pitch: 1
   Loop: 0
   Mute: 0

@@ -32,8 +32,7 @@ public class VoiceManager : MonoBehaviour
             onMultiValueEvent.AddListener(WakeWordDetected);
         }
         
-        // Requires wake word utterance for initial activation
-        appVoiceExperience.Activate("Hey fridge!");
+        appVoiceExperience.Activate();
     }
 
     private void OnDestroy()
