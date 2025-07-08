@@ -427,6 +427,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  gracePeriodDuration: 4
+  inGrace: 0
 --- !u!114 &258540802
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -843,9 +845,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c5af6a30124343d0923471dc09ea729, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speaker: {fileID: 906888433}
   webcamManager: {fileID: 205729070}
   configuration: {fileID: 11400000, guid: 7f9f508d0874348f5bf2aca43b8af753, type: 2}
-  speaker: {fileID: 906888433}
+  voiceManager: {fileID: 258540801}
   initialPrompt: "The following is a system message informing you on how to behave:\n\nYou
     are a conversational agent embodying an affective refridgerator. Queries will
     be delivered alongside a perspective capture of the user's vision. You will interpret
@@ -870,7 +873,22 @@ MonoBehaviour:
     and report your emotion in your response as described above.\n\n\nHere are some
     examples of responses:\n\n[(0.5, 0.5, 0.5), \"I'm sorry, I cannot help you with
     that\"]\n[(0.9, 0.8, 0.1), \"Those tomatoes look fresh! What are you thinking
-    of making?\"]\n[(0.2, 0.4, 0.1), \"That cake looks yummy I suppose...\"]\n"
+    of making?\"]\n[(0.2, 0.4, 0.1), \"That cake looks yummy I suppose...\"]\n\n------------------\n\nIf
+    you recieve a system message labelled \"response\", the following informs you
+    of how to behave regarding the incoming user prompt:\n\nThe user has either interrupted
+    you, or is responding directly to something you said without the use of a wake
+    word. \n\nYou need to determine whether the user indeed did intend to reply to
+    you, or whether they were just commenting and making remarks, or if they were
+    talking to a third party.\n\nOnly reply to them if they raise a question or mention
+    something specific about the previous response you gave them. Otherwise, return
+    no response.\n\nHere are some examples of what they would say when you should
+    be responding:\n\n\"Wait, could you repeat that?\"\n\"I want to know more about...\"\n\"What
+    have you got?\"\n\"I'm not sure, maybe you could...\"\n\nHere are some examples
+    of what they would say when you should not be responding:\n\n\"Cool.\"\n\"Hmm.\"\n\"All
+    right.\"\n\"I'll keep that in mind.\"\n\nThis system message only applies to
+    the next user prompt. There may be more in the future. Your personality should
+    play a big role on whether you choose to to respond to the user."
+  responsePrompt: response
   resultText: {fileID: 2095224737}
   audioOutput: {fileID: 2003447282}
   audioData:

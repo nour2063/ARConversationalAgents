@@ -3,7 +3,10 @@ using Oculus.Voice;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using System.Collections;
 using System.Reflection;
+using Meta.WitAi.TTS.Data;
+using Meta.WitAi.TTS.Utilities;
 
 public class VoiceManager : MonoBehaviour
 {
@@ -18,7 +21,13 @@ public class VoiceManager : MonoBehaviour
     [SerializeField] private UnityEvent wakeWordDetected;
     [SerializeField] private UnityEvent<string> completeTranscription;
 
+    [Header("Grace Period Settings")]
+    [SerializeField] private float gracePeriodDuration = 4.0f;
+
+    public bool inGrace = false;
+        
     private bool _voiceCommandReady;
+    private Coroutine _currentGracePeriodCoroutine;
 
     private void Start()
     {
@@ -30,6 +39,10 @@ public class VoiceManager : MonoBehaviour
         if (eventField != null && eventField.GetValue(responseMatcher) is MultiValueEvent onMultiValueEvent)
         {
             onMultiValueEvent.AddListener(WakeWordDetected);
+        }
+        if (ttsManager != null && ttsManager.speaker != null)
+        {
+            ttsManager.speaker.Events.OnPlaybackComplete.AddListener(HandleSpeechFinished);
         }
         
         appVoiceExperience.Activate();
@@ -46,6 +59,11 @@ public class VoiceManager : MonoBehaviour
         {
             onMultiValueEvent.RemoveListener(WakeWordDetected);
         }
+
+        if (_currentGracePeriodCoroutine != null)
+        {
+            StopCoroutine(_currentGracePeriodCoroutine);
+        }
     }
     
     private void ReactivateVoice() => appVoiceExperience.Activate();
@@ -54,20 +72,53 @@ public class VoiceManager : MonoBehaviour
     {
         _voiceCommandReady = true;
         wakeWordDetected?.Invoke();
+        
+        if (_currentGracePeriodCoroutine != null)
+        {
+            StopCoroutine(_currentGracePeriodCoroutine);
+            _currentGracePeriodCoroutine = null;
+        }
     }
 
     private void OnPartialTranscription(string transcription)
     {
-        if (!_voiceCommandReady) return;
-        transcriptionText.text = transcription;
+        if (_voiceCommandReady) 
+        {
+            transcriptionText.text = transcription;
+        }
     }
 
     private void OnFullTranscription(string transcription)
     {
-        if (!_voiceCommandReady) return;
-        _voiceCommandReady = false;
-        Debug.Log(transcription);
-        completeTranscription?.Invoke(transcription);
-        ttsManager.SubmitImage(transcription);
+        if (_voiceCommandReady) 
+        {
+            Debug.Log(transcription);
+            completeTranscription?.Invoke(transcription);
+            ttsManager.SubmitImage(transcription);
+
+            _voiceCommandReady = false; 
+
+            if (_currentGracePeriodCoroutine != null)
+            {
+                StopCoroutine(_currentGracePeriodCoroutine);
+            }
+        }
     }
+
+    private IEnumerator GracePeriodCountdown()
+    {
+        inGrace = true;
+        yield return new WaitForSeconds(gracePeriodDuration);
+        _currentGracePeriodCoroutine = null;
+        _voiceCommandReady = false; 
+        Debug.Log("TIMES UP");
+    }
+
+    private void HandleSpeechFinished(TTSSpeaker speaker, TTSClipData clip)
+    {
+        Debug.Log("ALL DONE!");
+        _voiceCommandReady = true; 
+        _currentGracePeriodCoroutine = StartCoroutine(GracePeriodCountdown());
+    }
+    
 }

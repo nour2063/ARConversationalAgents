@@ -12,13 +12,15 @@ using TMPro;
 public class PassthroughCameraTTS : MonoBehaviour
 {
     [Header("References")]
+    public TTSSpeaker speaker;
     [SerializeField] private WebCamTextureManager webcamManager;
     [SerializeField] private OpenAIConfiguration configuration;
-    [SerializeField] private TTSSpeaker speaker;
+    [SerializeField] private VoiceManager voiceManager;
     
     [Header("Vision Model")]
     [TextArea(30,10)]
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
+    [SerializeField] private string responsePrompt = "response";
     
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI resultText;
@@ -100,6 +102,13 @@ public class PassthroughCameraTTS : MonoBehaviour
         {
             var systemMessage = new Message(Role.System, initialPrompt);
             _chatHistory.Add(systemMessage);
+        }
+
+        if (voiceManager.inGrace)
+        {
+            var systemMessage = new Message(Role.System, responsePrompt);
+            _chatHistory.Add(systemMessage);
+            voiceManager.inGrace = false;
         }
 
         // building user's current message
@@ -195,7 +204,7 @@ public class PassthroughCameraTTS : MonoBehaviour
                 break;
         }
             
-        speaker.Speak(message);
+        speaker.SpeakQueued(message);
     }
     
     public void ClearChatHistory()
