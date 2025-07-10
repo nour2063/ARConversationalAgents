@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Meta.WitAi.TTS.Utilities;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PassthroughCameraSamples;
 using TMPro;
 using ollama;
@@ -46,7 +46,7 @@ public class PassthroughCameraLocal : MonoBehaviour
     private class Message
     {
         public readonly string Role;
-        public readonly string Content;
+        public string Content;
 
         public Message(string role, string content)
         {
@@ -54,17 +54,8 @@ public class PassthroughCameraLocal : MonoBehaviour
             this.Content = content;
         }
     }
-    
-    [System.Serializable]
-    private class ChatResponse
-    {
-        [JsonProperty("response")]
-        public string response;
-        [JsonProperty("emotion")]
-        public float[] emotion; // [pleasure, arousal, dominance]
-    }
 
-    private async void Awake()
+    private void Awake()
     {
         Ollama.SetServer(serverIP);
         
@@ -75,8 +66,9 @@ public class PassthroughCameraLocal : MonoBehaviour
         }
         
         Debug.Log(Ollama.GetServer());
-        var response = await Ollama.Generate("gemma3:12b", "Hey there!");
-        Debug.Log(response);
+        
+        // debug
+        // SubmitImage("Hey there!");
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -104,32 +96,30 @@ public class PassthroughCameraLocal : MonoBehaviour
         if (_processing) return;
         _processing = true;
 
+        var userMessage = new Message("user", prompt);
+        
         if (_chatHistory.Count == 0)
         {
-            var systemMessage = new Message("system", initialPrompt);
-            _chatHistory.Add(systemMessage);
+            userMessage.Content = initialPrompt + "\n \n" + prompt;
         }
 
         if (voiceManager.listening)
         {
-            var systemMessage = new Message("system", responsePrompt);
-            _chatHistory.Add(systemMessage);
-            voiceManager.listening = false;
+            userMessage.Content = responsePrompt + "\n \n" + prompt;
         }
         
         // building user's current message
 
-        _chatHistory.Add(new Message("user", prompt));
+        _chatHistory.Add(userMessage);
         
         // https://ai.google.dev/gemma/docs/core/prompt-structure
         var fullGemmaPrompt = _chatHistory.Aggregate("", (current, message) => current + message.Role switch
         {
-            "user" => $"<start_of_turn>user\n{message.Content}<end_of_turn> ",
-            "model" => $"<start_of_turn>model\n{message.Content}<end_of_turn> ",
-            _ => $"{message.Content}\n"
+            "model" => $"<start_of_turn>model\n{message.Content}<end_of_turn>\n",
+            _ => $"<start_of_turn>user\n{message.Content}<end_of_turn>\n",
         });
 
-        fullGemmaPrompt += "<start_of_turn>model\n>";
+        fullGemmaPrompt += "<start_of_turn>model\n";
         
         Debug.Log(fullGemmaPrompt);
 
@@ -140,14 +130,15 @@ public class PassthroughCameraLocal : MonoBehaviour
             imagesToSend = new Texture2D[] { image };
         }
 
-        ChatResponse response = null;
+        string response = null;
         try
         {
             resultText.text = "making chat request...";
             response =
-                await Ollama.GenerateJson<ChatResponse>("gemma3:12b", fullGemmaPrompt, images: imagesToSend);
+                await Ollama.Generate("gemma3:12b", fullGemmaPrompt, images: imagesToSend);
+            
             Debug.Log("Ollama response ok!");
-            Debug.Log(response.response + response.emotion);
+            Debug.Log(response);
         }
         catch (Exception e)
         {
@@ -157,9 +148,7 @@ public class PassthroughCameraLocal : MonoBehaviour
             return;
         }
         
-        _chatHistory.Add(new Message("model", $"{response.emotion}, {response.response}"));
-        Debug.Log(_chatHistory);
-
+        _chatHistory.Add(new Message("model", response));
         ParseResponse(response);
     }
 
@@ -185,18 +174,21 @@ public class PassthroughCameraLocal : MonoBehaviour
         }
     }
 
-    private void ParseResponse(ChatResponse response)
+    private void ParseResponse(string response)
     {
         Debug.Log("parsing response...");
         var randomIndex = UnityEngine.Random.Range(0, 9);
+        
+        var jsonResponse = JObject.Parse(response[8..^3]);
 
-        if (response.emotion is not { Length: 3 }) return;
+        var emotion = jsonResponse["emotion"]?.ToObject<float[]>();
+        if (emotion is not { Length: 3 }) return;
 
         // todo: maybe there's a better approach here...
         
-        var pleasure = (int)Math.Round(response.emotion[0]);
-        var arousal = (int)Math.Round(response.emotion[1]);
-        var sadness = (int)Math.Round(response.emotion[2]);
+        var pleasure = (int)Math.Round(emotion[0]);
+        var arousal = (int)Math.Round(emotion[1]);
+        var sadness = (int)Math.Round(emotion[2]);
         
         var emotionState = (pleasure, arousal, sadness);
         
@@ -219,10 +211,12 @@ public class PassthroughCameraLocal : MonoBehaviour
                 audioOutput.PlayOneShot(audioData.fearClips[randomIndex]);
                 break;
         }
+
+        var message = (string)jsonResponse["message"];
+        Debug.Log(message);
         
-        resultText.text = response.response;
-        Debug.Log(response.response);
-        speaker.SpeakQueued(response.response);
+        resultText.text = message;
+        speaker.SpeakQueued(message);
         _processing = false;
     }
     
