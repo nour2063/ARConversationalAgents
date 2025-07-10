@@ -1,8 +1,9 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using Meta.WitAi.TTS.Utilities;
 using Newtonsoft.Json;
-using Oculus.Voice.Dictation;
 using PassthroughCameraSamples;
 using TMPro;
 using ollama;
@@ -10,67 +11,80 @@ using ollama;
 public class PassthroughCameraLocal : MonoBehaviour
 {
     [Header("References")] 
+    public TTSSpeaker speaker;
     [SerializeField] private WebCamTextureManager webcamManager;
-    [SerializeField] private AppDictationExperience dictation;
-    [SerializeField] private TTSSpeaker speaker;
+    [SerializeField] private VoiceManager voiceManager;
 
     [Header("Vision Model")] 
     [SerializeField] private string serverIP = "http://localhost:11434/";
-    [SerializeField] private string visionModel = "gemma3:12b";
+    [TextArea(30,10)]
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
+    [SerializeField] private string responsePrompt = "response";
     
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI resultText;
-    [SerializeField] private TextMeshProUGUI dictationText;
+    
+    [System.Serializable]
+    public class EmotionalAudioBurstData
+    {
+        public List<AudioClip> neutralClips = new List<AudioClip>();
+        public List<AudioClip> fearClips = new List<AudioClip>();
+        public List<AudioClip> happinessClips = new List<AudioClip>();
+        public List<AudioClip> sadnessClips = new List<AudioClip>();
+    }
+
+    [Header("Emotional Audio Bursts")]
+    [SerializeField] private AudioSource audioOutput;
+    [SerializeField] private EmotionalAudioBurstData audioData = new EmotionalAudioBurstData();
     
     [Header("Debug Image")]
     [SerializeField] private Texture2D image;
     
-    private bool _resultLocked = false;
+    private bool _processing;
+    private readonly List<Message> _chatHistory = new List<Message>();
     
-    public class Message
+    private class Message
     {
-        public string role;
-        public string content;
+        public readonly string Role;
+        public readonly string Content;
 
         public Message(string role, string content)
         {
-            this.role = role;
-            this.content = content;
+            this.Role = role;
+            this.Content = content;
         }
     }
+    
+    [System.Serializable]
+    private class ChatResponse
+    {
+        [JsonProperty("response")]
+        public string response;
+        [JsonProperty("emotion")]
+        public float[] emotion; // [pleasure, arousal, dominance]
+    }
 
-    private void Awake()
+    private async void Awake()
     {
         Ollama.SetServer(serverIP);
+        
+        // on-device testing
         if (serverIP == "http://localhost:11434/")
         {
             Ollama.Launch();
         }
-        resultText.text = Ollama.GetServer();
+        
+        Debug.Log(Ollama.GetServer());
+        var response = await Ollama.Generate("gemma3:12b", "Hey there!");
+        Debug.Log(response);
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    public async void Start()
+    public void Start()
     {
         if (webcamManager == null)
         {
             Debug.LogError("Webcam manager not set in PassthroughCameraLocal");
-        }
-
-        if (dictation == null)
-        {
-            Debug.LogError("Dictation manager not set in PassthroughCameraLocal");
-        }
-
-        if (speaker == null)
-        {
-            Debug.LogError("Speaker not set in PassthroughCameraLocal");
-        }
-
-        if (dictationText == null)
-        {
-            Debug.LogError("DictationText UI not set in PassthroughCameraLocal");
         }
 
         if (resultText == null)
@@ -80,86 +94,141 @@ public class PassthroughCameraLocal : MonoBehaviour
 
         if (image != null)
         {
-            SubmitImage();
+            SubmitImage("What do you think of this?");
         } 
-        var response = await Ollama.Generate(visionModel, "Hey there!");
-        resultText.text = response;
     }
 
-    // Update is called once per frame
-    void Update()
+    public async void SubmitImage(string prompt)
     {
-        if (!ReferenceEquals(webcamManager.WebCamTexture, null))
+        
+        if (_processing) return;
+        _processing = true;
+
+        if (_chatHistory.Count == 0)
         {
-            if (OVRInput.GetDown(OVRInput.RawButton.A))
-            {
-                dictation.Activate();
-                CaptureImage();
-            }
+            var systemMessage = new Message("system", initialPrompt);
+            _chatHistory.Add(systemMessage);
         }
-    }
 
-    public async void SubmitImage()
-    {
-        var test = await Ollama.Generate(visionModel, "Hello");
-        Debug.Log(test);
-        
-        if (_resultLocked) return;
-        _resultLocked = true;
-        
-        var messages = new List<Message>
+        if (voiceManager.listening)
         {
-            new Message("system", initialPrompt),
-            new Message("user", dictationText.text)
-        };
+            var systemMessage = new Message("system", responsePrompt);
+            _chatHistory.Add(systemMessage);
+            voiceManager.listening = false;
+        }
         
-        var jsonPrompt = JsonConvert.SerializeObject(new { messages }, Formatting.Indented);
+        // building user's current message
+
+        _chatHistory.Add(new Message("user", prompt));
         
-        var fullPrompt = "Please interpret the following input as JSON. The system message informs you on how to behave, and the user's message is contextualized with the image provided. Fulfill the role of the system and respond to the user directly.:\n" + jsonPrompt;
+        // https://ai.google.dev/gemma/docs/core/prompt-structure
+        var fullGemmaPrompt = _chatHistory.Aggregate("", (current, message) => current + message.Role switch
+        {
+            "user" => $"<start_of_turn>user\n{message.Content}<end_of_turn> ",
+            "model" => $"<start_of_turn>model\n{message.Content}<end_of_turn> ",
+            _ => $"{message.Content}\n"
+        });
+
+        fullGemmaPrompt += "<start_of_turn>model\n>";
         
-        var response = await Ollama.Generate(visionModel, fullPrompt, images: new [] { image });
+        Debug.Log(fullGemmaPrompt);
+
+        Texture2D[] imagesToSend = null;
+
+        if (image != null)
+        {
+            imagesToSend = new Texture2D[] { image };
+        }
+
+        ChatResponse response = null;
+        try
+        {
+            resultText.text = "making chat request...";
+            response =
+                await Ollama.GenerateJson<ChatResponse>("gemma3:12b", fullGemmaPrompt, images: imagesToSend);
+            Debug.Log("Ollama response ok!");
+            Debug.Log(response.response + response.emotion);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Ollama API Error: {e.Message}");
+            resultText.text = $"Ollama Error: {e.Message}. Check console.";
+            _processing = false;
+            return;
+        }
         
-        resultText.text = response;
-        speaker.Speak(response);
-        Debug.Log(response);
+        _chatHistory.Add(new Message("model", $"{response.emotion}, {response.response}"));
+        Debug.Log(_chatHistory);
+
+        ParseResponse(response);
     }
 
     public void CaptureImage()
     {
-        _resultLocked = false;
-        
-        resultText.text = "Capturing...";
-        int width = webcamManager.WebCamTexture.width;
-        int height = webcamManager.WebCamTexture.height;
-
-        if (ReferenceEquals(image, null))
+        try
         {
-            image = new Texture2D(width, height);
+            resultText.text = "Capturing...";
+            var width = webcamManager.WebCamTexture.width;
+            var height = webcamManager.WebCamTexture.height;
+
+            image ??= new Texture2D(width, height);
+
+            var pixels = new Color32[width * height];
+            webcamManager.WebCamTexture.GetPixels32(pixels);
+
+            image.SetPixels32(pixels);
+            image.Apply();
+        }
+        catch
+        {
+            // testing in editor -- no camera
+        }
+    }
+
+    private void ParseResponse(ChatResponse response)
+    {
+        Debug.Log("parsing response...");
+        var randomIndex = UnityEngine.Random.Range(0, 9);
+
+        if (response.emotion is not { Length: 3 }) return;
+
+        // todo: maybe there's a better approach here...
+        
+        var pleasure = (int)Math.Round(response.emotion[0]);
+        var arousal = (int)Math.Round(response.emotion[1]);
+        var sadness = (int)Math.Round(response.emotion[2]);
+        
+        var emotionState = (pleasure, arousal, sadness);
+        
+        switch (emotionState)
+        {
+            case (0, 0, 0):
+                audioOutput.PlayOneShot(audioData.sadnessClips[randomIndex]);
+                break;
+            case (1, 0, 0):
+            case (1, 1, 0):
+            case (1, 1, 1):
+                audioOutput.PlayOneShot(audioData.happinessClips[randomIndex]);
+                break;
+            case (0, 0, 1): 
+            case (1, 0, 1):
+            case (0, 1, 1):
+                audioOutput.PlayOneShot(audioData.neutralClips[randomIndex]);
+                break;
+            case (0, 1, 0):
+                audioOutput.PlayOneShot(audioData.fearClips[randomIndex]);
+                break;
         }
         
-        Color32[] pixels = new Color32[width * height];
-        webcamManager.WebCamTexture.GetPixels32(pixels);
-        
-        image.SetPixels32(pixels);
-        image.Apply();
-
-        image = ResizeTexture(image, 256, 256);
+        resultText.text = response.response;
+        Debug.Log(response.response);
+        speaker.SpeakQueued(response.response);
+        _processing = false;
     }
     
-    private Texture2D ResizeTexture(Texture2D source, int newWidth, int newHeight)
+    public void ClearChatHistory()
     {
-        RenderTexture rt = RenderTexture.GetTemporary(newWidth, newHeight);
-        Graphics.Blit(source, rt);
-        RenderTexture previous = RenderTexture.active;
-        RenderTexture.active = rt;
-
-        Texture2D newTex = new Texture2D(newWidth, newHeight, TextureFormat.RGB24, false);
-        newTex.ReadPixels(new Rect(0, 0, newWidth, newHeight), 0, 0);
-        newTex.Apply();
-
-        RenderTexture.active = previous;
-        RenderTexture.ReleaseTemporary(rt);
-        return newTex;
+        _chatHistory.Clear();
     }
 
 }

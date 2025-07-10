@@ -10,7 +10,7 @@ using Meta.WitAi.TTS.Utilities;
 
 public class VoiceManager : MonoBehaviour
 {
-    [SerializeField] private PassthroughCameraTTS ttsManager;
+    [SerializeField] private PassthroughCameraLocal llmManager;
     
     [Header("Wit Configuration")]
     [SerializeField] private AppVoiceExperience appVoiceExperience;
@@ -22,9 +22,9 @@ public class VoiceManager : MonoBehaviour
     [SerializeField] private UnityEvent<string> completeTranscription;
 
     [Header("Grace Period Settings")]
-    [SerializeField] private float gracePeriodDuration = 4.0f;
+    [SerializeField] private float listeningDuration = 5.0f;
 
-    public bool inGrace = false;
+    public bool listening;
         
     private bool _voiceCommandReady;
     private Coroutine _currentGracePeriodCoroutine;
@@ -40,9 +40,9 @@ public class VoiceManager : MonoBehaviour
         {
             onMultiValueEvent.AddListener(WakeWordDetected);
         }
-        if (ttsManager != null && ttsManager.speaker != null)
+        if (llmManager != null && llmManager.speaker != null)
         {
-            ttsManager.speaker.Events.OnPlaybackComplete.AddListener(HandleSpeechFinished);
+            llmManager.speaker.Events.OnPlaybackComplete.AddListener(HandleSpeechFinished);
         }
         
         appVoiceExperience.Activate();
@@ -72,12 +72,11 @@ public class VoiceManager : MonoBehaviour
     {
         _voiceCommandReady = true;
         wakeWordDetected?.Invoke();
+
+        if (_currentGracePeriodCoroutine == null) return;
         
-        if (_currentGracePeriodCoroutine != null)
-        {
-            StopCoroutine(_currentGracePeriodCoroutine);
-            _currentGracePeriodCoroutine = null;
-        }
+        StopCoroutine(_currentGracePeriodCoroutine);
+        _currentGracePeriodCoroutine = null;
     }
 
     private void OnPartialTranscription(string transcription)
@@ -90,25 +89,25 @@ public class VoiceManager : MonoBehaviour
 
     private void OnFullTranscription(string transcription)
     {
-        if (_voiceCommandReady) 
+        if (!_voiceCommandReady) return;
+        
+        Debug.Log(transcription);
+        completeTranscription?.Invoke(transcription);
+        
+        llmManager.SubmitImage(transcription);
+
+        _voiceCommandReady = false; 
+
+        if (_currentGracePeriodCoroutine != null)
         {
-            Debug.Log(transcription);
-            completeTranscription?.Invoke(transcription);
-            ttsManager.SubmitImage(transcription);
-
-            _voiceCommandReady = false; 
-
-            if (_currentGracePeriodCoroutine != null)
-            {
-                StopCoroutine(_currentGracePeriodCoroutine);
-            }
+            StopCoroutine(_currentGracePeriodCoroutine);
         }
     }
 
     private IEnumerator GracePeriodCountdown()
     {
-        inGrace = true;
-        yield return new WaitForSeconds(gracePeriodDuration);
+        listening = true;
+        yield return new WaitForSeconds(listeningDuration);
         _currentGracePeriodCoroutine = null;
         _voiceCommandReady = false; 
         Debug.Log("TIMES UP");

@@ -104,11 +104,11 @@ public class PassthroughCameraTTS : MonoBehaviour
             _chatHistory.Add(systemMessage);
         }
 
-        if (voiceManager.inGrace)
+        if (voiceManager.listening)
         {
             var systemMessage = new Message(Role.System, responsePrompt);
             _chatHistory.Add(systemMessage);
-            voiceManager.inGrace = false;
+            voiceManager.listening = false;
         }
 
         // building user's current message
