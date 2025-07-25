@@ -1,44 +1,39 @@
-using UnityEngine;
+// Place this in a new C# script file named "WavUtility.cs"
 using System;
+using UnityEngine;
 
 public static class WavUtility
 {
-    public static AudioClip ToAudioClip(byte[] wavBytes)
+    // This is the thread-safe method for background processing
+    public static float[] GetSamplesFromWav(byte[] wavBytes, out int channels, out int sampleRate)
     {
-        int headerSize = 44; 
-        if (wavBytes.Length < headerSize)
+        // Basic WAV header parsing
+        // Assumes 16-bit PCM audio, which is standard for TTS output
+        try
         {
-            Debug.LogError("WavUtility: Invalid WAV file - header too short.");
+            channels = BitConverter.ToInt16(wavBytes, 22);
+            sampleRate = BitConverter.ToInt32(wavBytes, 24);
+
+            int headerOffset = 44; // Standard WAV header size
+            int dataSize = wavBytes.Length - headerOffset;
+            int sampleCount = dataSize / 2; // 2 bytes per 16-bit sample
+
+            float[] samples = new float[sampleCount];
+
+            for (int i = 0; i < sampleCount; i++)
+            {
+                short sampleShort = BitConverter.ToInt16(wavBytes, headerOffset + i * 2);
+                samples[i] = sampleShort / 32768.0f; // Convert to float range -1 to 1
+            }
+
+            return samples;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error parsing WAV data: {e.Message}");
+            channels = 0;
+            sampleRate = 0;
             return null;
         }
-
-        int sampleRate = BitConverter.ToInt32(wavBytes, 24);
-        int channels = BitConverter.ToInt16(wavBytes, 22);
-        int bitsPerSample = BitConverter.ToInt16(wavBytes, 34);
-
-        if (bitsPerSample != 16)
-        {
-            Debug.LogError("WavUtility: Only 16-bit WAV is supported by this utility. Received " + bitsPerSample + " bits.");
-            return null;
-        }
-
-        int dataSize = BitConverter.ToInt32(wavBytes, 40); 
-        if (wavBytes.Length < headerSize + dataSize)
-        {
-            Debug.LogError("WavUtility: Invalid WAV file - data size mismatch.");
-            return null;
-        }
-
-        float[] samples = new float[dataSize / 2]; 
-
-        for (int i = 0; i < samples.Length; i++)
-        {
-            short sample = BitConverter.ToInt16(wavBytes, headerSize + i * 2);
-            samples[i] = sample / 32768f; // Normalize to -1.0 to 1.0 range
-        }
-
-        AudioClip audioClip = AudioClip.Create("SynthesizedSpeech", samples.Length, channels, sampleRate, false);
-        audioClip.SetData(samples, 0);
-        return audioClip;
     }
 }

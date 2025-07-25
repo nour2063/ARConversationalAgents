@@ -223,7 +223,7 @@ public class PassthroughCameraLocal : MonoBehaviour
         Debug.Log(message);
         
         resultText.text = message;
-        _ = speaker.Speak(message);
+        speaker.Speak(message);
         _processing = false;
     }
     

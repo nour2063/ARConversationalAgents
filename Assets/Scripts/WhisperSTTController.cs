@@ -1,56 +1,56 @@
 using UnityEngine;
 using System;
 using System.Collections;
-using System.IO;
-using System.Threading.Tasks;
-using UnityEngine.Events; // Required for UnityEvents
-using Whisper; // From your installed 'com.whisper.unity' package
+using UnityEngine.Events;
+using Whisper;
 
-// Implement the interface required by WakeWordDetector
-public class WhisperSTTController : MonoBehaviour, ICommandListener
+public class WhisperSTTController : MonoBehaviour
 {
-    // Reference to the WhisperManager component from your package.
-    [Tooltip("Assign the WhisperManager component from your 'com.whisper.unity' package here. If left blank, it will try to FindObjectOfType.")]
+    [Tooltip("Assign the WhisperManager component from your 'com.whisper.unity' package here.")]
     public WhisperManager whisperManager;
+    [SerializeField] private LocalNetworkTTS speaker;
 
-    [Tooltip("Filename of the Whisper model (e.g., ggml-tiny.bin) in StreamingAssets. This is configured directly on the WhisperManager component.")]
-    public string whisperModelFilename = "ggml-tiny.bin"; 
-
-    // Event to send transcribed text out to your NLU/TTS logic (C# event for code subscribers)
-    public event Action<string> OnCommandTranscribed; 
-    public event Action OnCommandListenTimeout; // Signifies when listening period has ended
+    // C# Events for code subscribers
+    public event Action<string> OnCommandTranscribed;
+    public event Action OnCommandListenTimeout;
 
     // UnityEvents for Inspector binding
     [Header("Event Callbacks")]
     [Tooltip("Fires when the system starts actively listening for a command.")]
     public UnityEvent OnListeningStartEvent;
-    // *** MODIFIED: OnTranscriptionSuccessEvent now passes the transcribed string ***
-    [Tooltip("Fires when transcription is successful and text is obtained. Passes the transcribed string as an argument.")]
-    public UnityEvent<string> OnTranscriptionSuccessEvent; 
-    [Tooltip("Fires when transcription fails (e.g., no speech, error during processing).")]
+    [Tooltip("Fires when transcription is successful. Passes the transcribed string as an argument.")]
+    public UnityEvent<string> OnTranscriptionSuccessEvent;
+    [Tooltip("Fires when transcription fails (e.g., no speech, error).")]
     public UnityEvent OnTranscriptionFailedEvent;
+
+    [Header("Microphone Settings")]
+    public int SampleRate = 16000;
+    public int MaxRecordingLengthSeconds = 10;
+
+    [Header("Voice Activity Detection (VAD)")]
+    public bool useVoiceActivityDetection = true;
+    [Range(0.0f, 0.1f)]
+    public float silenceThreshold = 0.01f;
+    public float requiredSilenceDuration = 1.5f;
+    private const float VAD_CHECK_INTERVAL = 0.1f;
+
 
     private AudioClip _recordingClip;
     private string _microphoneDevice;
     private bool _isRecordingCommand = false;
-    private Task<WhisperResult> _transcriptionTask; // To hold the async transcription task
+    private Coroutine _voiceActivityCoroutine;
 
-    [Header("Microphone Settings for Whisper")]
-    public int SampleRate = 16000; // Whisper models typically expect 16kHz
-    public int MaxRecordingLengthSeconds = 10; // Max duration for a single command capture
-    
     void Awake()
     {
         if (Microphone.devices.Length > 0)
         {
-            _microphoneDevice = Microphone.devices[0]; // Use the first available microphone
+            _microphoneDevice = Microphone.devices[0];
         }
         else
         {
-            Debug.LogError("WhisperSTTController: No microphone devices found! Please ensure your Quest has a working mic.");
+            Debug.LogError("WhisperSTTController: No microphone devices found!");
             enabled = false;
         }
-        
     }
 
     public void StartListeningForCommand(float duration)
@@ -61,99 +61,150 @@ public class WhisperSTTController : MonoBehaviour, ICommandListener
             return;
         }
 
-        Debug.Log($"WhisperSTTController: Starting to record for a command for {duration} seconds...");
+        Debug.Log($"WhisperSTTController: Starting to record command...");
         _isRecordingCommand = true;
-        
-        OnListeningStartEvent?.Invoke(); // Invoke UnityEvent when listening starts
+        OnListeningStartEvent?.Invoke();
 
         if (Microphone.IsRecording(_microphoneDevice))
         {
             Microphone.End(_microphoneDevice);
         }
-
-        _recordingClip = Microphone.Start(_microphoneDevice, false, MaxRecordingLengthSeconds, SampleRate);
         
-        CancelInvoke(nameof(StopListeningForCommand)); 
+        _recordingClip = Microphone.Start(_microphoneDevice, true, MaxRecordingLengthSeconds, SampleRate);
+
+        if (useVoiceActivityDetection)
+        {
+            _voiceActivityCoroutine = StartCoroutine(MonitorVoiceActivity());
+        }
+        
         Invoke(nameof(StopListeningForCommand), duration);
     }
 
-    public async void StopListeningForCommand() // Made async
+    public async void StopListeningForCommand()
     {
-        if (!_isRecordingCommand)
-        {
-            Debug.LogWarning("WhisperSTTController: Not currently recording a command. Ignoring stop request.");
-            return;
-        }
+        if (!_isRecordingCommand) return; 
 
-        Debug.Log("WhisperSTTController: Stopping command recording.");
         _isRecordingCommand = false;
         CancelInvoke(nameof(StopListeningForCommand)); 
 
-        if (Microphone.IsRecording(_microphoneDevice))
+        if (_voiceActivityCoroutine != null)
         {
-            Microphone.End(_microphoneDevice); 
+            StopCoroutine(_voiceActivityCoroutine);
+            _voiceActivityCoroutine = null;
+        }
 
-            if (_recordingClip != null && _recordingClip.samples > 0)
+        Debug.Log("WhisperSTTController: Stopping command recording.");
+        int micPosition = Microphone.GetPosition(_microphoneDevice);
+        Microphone.End(_microphoneDevice);
+
+        if (_recordingClip == null || micPosition <= 0)
+        {
+            Debug.LogWarning("WhisperSTTController: Recorded audio clip is empty. Not transcribing.");
+            OnTranscriptionFailedEvent?.Invoke();
+            // This path should also signal the timeout to prevent a stuck state
+            OnCommandListenTimeout?.Invoke(); 
+            return;
+        }
+        
+        float[] samples = new float[_recordingClip.samples * _recordingClip.channels];
+        _recordingClip.GetData(samples, 0);
+        float[] trimmedSamples = new float[micPosition * _recordingClip.channels];
+        Array.Copy(samples, trimmedSamples, trimmedSamples.Length);
+        AudioClip trimmedClip = AudioClip.Create("TrimmedRecording", micPosition, _recordingClip.channels, _recordingClip.frequency, false);
+        trimmedClip.SetData(trimmedSamples, 0);
+
+        try
+        {
+            Debug.Log("WhisperSTTController: Passing audio to WhisperManager for transcription.");
+            var result = await whisperManager.GetTextAsync(trimmedClip);
+
+            // --- EXCLUSIVE CHANGE IS HERE ---
+            if (result != null && !string.IsNullOrEmpty(result.Result))
             {
-                if (whisperManager != null)
-                {
-                    Debug.Log("WhisperSTTController: Passing audio to WhisperManager for transcription.");
-                    
-                    try
-                    {
-                        _transcriptionTask = whisperManager.GetTextAsync(_recordingClip);
-                        WhisperResult result = await _transcriptionTask; 
+                // Remove the noise token and any surrounding whitespace
+                string cleanedText = result.Result.Replace("[BLANK_AUDIO]", "").Trim();
 
-                        if (result != null && !string.IsNullOrEmpty(result.Result)) // Access result.Result
-                        {
-                            Debug.Log($"Whisper Transcribed: \"{result.Result}\"");
-                            OnCommandTranscribed?.Invoke(result.Result); 
-                            OnTranscriptionSuccessEvent?.Invoke(result.Result); // *** MODIFIED: Invoke with result.Result ***
-                        }
-                        else
-                        {
-                            Debug.LogWarning("WhisperSTTController: Transcription result was null or empty (no speech detected or empty transcription).");
-                            OnCommandTranscribed?.Invoke(""); 
-                            OnTranscriptionFailedEvent?.Invoke(); // Invoke UnityEvent on failure
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError($"WhisperSTTController: Transcription failed: {e.Message}");
-                        OnCommandTranscribed?.Invoke(""); 
-                        OnTranscriptionFailedEvent?.Invoke(); // Invoke UnityEvent on error
-                    }
+                // Check if any actual text remains after cleaning
+                if (!string.IsNullOrEmpty(cleanedText))
+                {
+                    Debug.Log($"Whisper Transcribed (Cleaned): \"{cleanedText}\"");
+                    OnCommandTranscribed?.Invoke(cleanedText);
+                    OnTranscriptionSuccessEvent?.Invoke(cleanedText);
                 }
                 else
                 {
-                    Debug.LogError("WhisperSTTController: WhisperManager is null. Cannot transcribe.");
-                    OnCommandTranscribed?.Invoke(""); 
-                    OnTranscriptionFailedEvent?.Invoke(); // Invoke UnityEvent on failure
+                    // This handles cases where the original text was only "[BLANK_AUDIO]"
+                    Debug.LogWarning($"Transcription result contained only non-speech tokens. Raw: \"{result.Result}\"");
+                    OnTranscriptionFailedEvent?.Invoke();
                 }
             }
             else
             {
-                Debug.LogWarning("WhisperSTTController: Recorded audio clip is empty or null. Not transcribing (no audio input).");
-                OnCommandTranscribed?.Invoke(""); 
-                OnTranscriptionFailedEvent?.Invoke(); // Invoke UnityEvent on failure
+                var rawResult = (result == null || string.IsNullOrEmpty(result.Result)) ? "NULL_OR_EMPTY" : result.Result;
+                Debug.LogWarning($"WhisperSTTController: Transcription failed. Raw result from Whisper: \"{rawResult}\"");
+                OnTranscriptionFailedEvent?.Invoke();
             }
         }
-        else
+        catch (Exception e)
         {
-            Debug.LogWarning("WhisperSTTController: Microphone was not recording when StopListeningForCommand was called.");
-            OnCommandTranscribed?.Invoke(""); 
-            OnTranscriptionFailedEvent?.Invoke(); // Invoke UnityEvent on failure
+            Debug.LogError($"WhisperSTTController: Transcription failed: {e.Message}");
+            OnTranscriptionFailedEvent?.Invoke();
         }
+        finally
+        {
+            OnCommandListenTimeout?.Invoke();
+            Destroy(trimmedClip); 
+        }
+    }
+    
+    private IEnumerator MonitorVoiceActivity()
+    {
+        float silentTime = 0;
+        int lastSamplePosition = 0;
+        float[] sampleChunk = new float[Mathf.CeilToInt(SampleRate * VAD_CHECK_INTERVAL)];
 
-        OnCommandListenTimeout?.Invoke(); 
+        yield return new WaitForSeconds(0.5f); 
+
+        while (_isRecordingCommand)
+        {
+            int currentSamplePosition = Microphone.GetPosition(_microphoneDevice);
+            
+            _recordingClip.GetData(sampleChunk, lastSamplePosition);
+            
+            float sum = 0;
+            for (int i = 0; i < sampleChunk.Length; i++)
+            {
+                sum += Mathf.Abs(sampleChunk[i]); 
+            }
+            float averageVolume = sum / sampleChunk.Length;
+
+            if (averageVolume < silenceThreshold)
+            {
+                silentTime += VAD_CHECK_INTERVAL;
+            }
+            else
+            {
+                silentTime = 0; 
+            }
+
+            if (silentTime >= requiredSilenceDuration)
+            {
+                Debug.Log($"VAD: Silence detected for {requiredSilenceDuration}s. Stopping recording.");
+                StopListeningForCommand();
+                yield break;
+            }
+
+            lastSamplePosition = currentSamplePosition;
+            yield return new WaitForSeconds(VAD_CHECK_INTERVAL);
+        }
     }
     
     void OnDestroy()
     {
-        if (Microphone.IsRecording(_microphoneDevice))
+        if (_microphoneDevice != null && Microphone.IsRecording(_microphoneDevice))
         {
             Microphone.End(_microphoneDevice);
         }
-        CancelInvoke(); 
+        CancelInvoke();
     }
 }

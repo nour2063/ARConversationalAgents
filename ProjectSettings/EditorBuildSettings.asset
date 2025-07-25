@@ -27,7 +27,7 @@ EditorBuildSettings:
     path: Assets/Scenes/OllamaGemmaScene.unity
     guid: a601561516e004666a06f0d978763702
   - enabled: 1
-    path: Assets/Scenes/GPTFridge.unity
+    path: Assets/Scenes/TalkingFridge.unity
     guid: 3fb9a26b2508e4171807f91886872757
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
