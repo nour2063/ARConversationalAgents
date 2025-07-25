@@ -29,7 +29,7 @@ public class IdleAnimator : MonoBehaviour
     [Tooltip("How quickly the random breath speed changes when talking.")]
     public float talkingRandomnessFrequency = 0.5f; // How often the random speed is re-evaluated
 
-    [SerializeField] private TTSSpeaker speaker;
+    [SerializeField] private LocalNetworkTTS speaker;
     
     private Vector3 initialPosition;
     private Vector3 initialScale;
@@ -57,7 +57,7 @@ public class IdleAnimator : MonoBehaviour
             // If idle animation is enabled/disabled during play, start/stop the coroutine
             if (enableIdleAnimation && idleCoroutine == null)
             {
-                StartCoroutine(DoIdleAnimation());
+                Invoke(nameof(StartIdleAnimationDelayed), 0.5f);
             }
             else if (!enableIdleAnimation && idleCoroutine != null)
             {
@@ -84,7 +84,7 @@ public class IdleAnimator : MonoBehaviour
             // --- Hovering (Y-axis movement) ---
             // Uses Time.time for a continuous, framerate-independent animation
             float currentHoverHeight = hoverHeight;
-            if (speaker.IsSpeaking)
+            if (speaker.IsSpeaking())
             {
                 currentHoverHeight *= talkingHoverHeightMultiplier; // Reduce hover height when talking
             }
@@ -93,7 +93,7 @@ public class IdleAnimator : MonoBehaviour
 
             // --- Breathing (Scale modulation) ---
             float currentBreathSpeed = breathSpeed;
-            if (speaker.IsSpeaking)
+            if (speaker.IsSpeaking())
             {
                 // Modulate breath speed for "talking" effect
                 // Use Perlin noise for smooth, random-like fluctuations

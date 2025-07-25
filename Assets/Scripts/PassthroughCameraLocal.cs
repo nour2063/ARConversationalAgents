@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using Meta.WitAi.TTS.Utilities;
 using Newtonsoft.Json.Linq;
 using PassthroughCameraSamples;
 using TMPro;
@@ -11,9 +10,8 @@ using ollama;
 public class PassthroughCameraLocal : MonoBehaviour
 {
     [Header("References")] 
-    public TTSSpeaker speaker;
     [SerializeField] private WebCamTextureManager webcamManager;
-    [SerializeField] private VoiceManager voiceManager;
+    [SerializeField] private LocalNetworkTTS speaker;
     [SerializeField] private ColourManager colourManager;
 
     [Header("Vision Model")] 
@@ -107,7 +105,7 @@ public class PassthroughCameraLocal : MonoBehaviour
             userMessage.Content = initialPrompt + "\n \n" + prompt;
         }
         
-        if (voiceManager.listening)
+        if (speaker.IsListening())
         {
             userMessage.Content = responsePrompt + "\n \n" + prompt;
         }
@@ -193,10 +191,10 @@ public class PassthroughCameraLocal : MonoBehaviour
         var arousal = (int)Math.Round(emotion[1]);
         var dominance = (int)Math.Round(emotion[2]);
         
-        // todo: this is arbitrary -- figure out how to make colour make sense
-        colourManager.SetColor(0, new Color(0.4f, 1f, 0.4f, pleasure));
-        colourManager.SetColor(1, new Color(0.4f, 0.4f, 1f, arousal));
-        colourManager.SetColor(2, new Color(1f, 0.4f, 0.4f, dominance));
+        // // todo: this is arbitrary -- figure out how to make colour make sense
+        // colourManager.SetColor(0, new Color(0.4f, 1f, 0.4f, pleasure));
+        // colourManager.SetColor(1, new Color(0.4f, 0.4f, 1f, arousal));
+        // colourManager.SetColor(2, new Color(1f, 0.4f, 0.4f, dominance));
         
         // todo -- TEMPORARY SOLUTION read paper thoroughly and match bursts with P-A
         var emotionBurst = (pleasure, arousal, dominance);
@@ -225,7 +223,7 @@ public class PassthroughCameraLocal : MonoBehaviour
         Debug.Log(message);
         
         resultText.text = message;
-        speaker.SpeakQueued(message);
+        _ = speaker.Speak(message);
         _processing = false;
     }
     

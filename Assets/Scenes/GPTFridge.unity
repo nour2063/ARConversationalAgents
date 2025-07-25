@@ -489,7 +489,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 381890444}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -957,7 +957,7 @@ GameObject:
   - component: {fileID: 726743642}
   - component: {fileID: 726743641}
   m_Layer: 0
-  m_Name: WhisperSTTManager
+  m_Name: WhisperSTT Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1012,8 +1012,8 @@ MonoBehaviour:
   OnListeningStartEvent:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 736312096}
-        m_TargetAssemblyTypeName: PassthroughCameraTTS, Assembly-CSharp
+      - m_Target: {fileID: 2112861937}
+        m_TargetAssemblyTypeName: PassthroughCameraLocal, Assembly-CSharp
         m_MethodName: CaptureImage
         m_Mode: 1
         m_Arguments:
@@ -1039,8 +1039,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 736312096}
-        m_TargetAssemblyTypeName: PassthroughCameraTTS, Assembly-CSharp
+      - m_Target: {fileID: 2112861937}
+        m_TargetAssemblyTypeName: PassthroughCameraLocal, Assembly-CSharp
         m_MethodName: SubmitImage
         m_Mode: 0
         m_Arguments:
@@ -1077,7 +1077,7 @@ Transform:
   m_GameObject: {fileID: 726743640}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1099,7 +1099,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &736312095
 Transform:
   m_ObjectHideFlags: 0
@@ -1109,11 +1109,11 @@ Transform:
   m_GameObject: {fileID: 736312093}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalPosition: {x: 0, y: 0.22000001, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2003447281}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &736312096
 MonoBehaviour:
@@ -1298,7 +1298,7 @@ GameObject:
   - component: {fileID: 899311131}
   - component: {fileID: 899311130}
   m_Layer: 0
-  m_Name: WakeWordDetector
+  m_Name: Porcupine Wake Word Detector
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1344,7 +1344,7 @@ Transform:
   m_GameObject: {fileID: 899311129}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2840,6 +2840,156 @@ MonoBehaviour:
   audioSource: {fileID: 1668087090}
   startSound: {fileID: 8300000, guid: 73acde91865eb4ea3b5579c658f1c9ea, type: 3}
   endSound: {fileID: 8300000, guid: 6320b9710736a4bd3b75635bea01a4c1, type: 3}
+--- !u!1 &1776951214
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1776951215}
+  - component: {fileID: 1776951216}
+  - component: {fileID: 1776951217}
+  m_Layer: 0
+  m_Name: CoquiTTS Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1776951215
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776951214}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2003447281}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1776951216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776951214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 06fa3398ef7154d34badd7fc90c25d79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverIPAddress: 130.209.252.253
+  serverPort: 5000
+  coquiApiEndpoint: /synthesize_speech
+  espeakApiEndpoint: /synthesize_espeak
+  coquiSpeakerID: 
+  espeakVoiceID: 
+  whisperSTTController: {fileID: 726743642}
+  listeningDuration: 5
+--- !u!82 &1776951217
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776951214}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1861760732
 GameObject:
   m_ObjectHideFlags: 0
@@ -3039,10 +3189,10 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 381890445}
-  - {fileID: 736312095}
+  - {fileID: 2112861936}
   - {fileID: 899311131}
   - {fileID: 726743643}
-  - {fileID: 2112861936}
+  - {fileID: 1776951215}
   m_Father: {fileID: 477866302}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!82 &2003447282
@@ -3164,7 +3314,7 @@ MonoBehaviour:
   talkingBaseBreathSpeed: 2
   talkingRandomBreathFluctuation: 0.01
   talkingRandomnessFrequency: 5
-  speaker: {fileID: 906888433}
+  speaker: {fileID: 1776951216}
 --- !u!1 &2095224735
 GameObject:
   m_ObjectHideFlags: 0
@@ -3317,7 +3467,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2112861936
 Transform:
   m_ObjectHideFlags: 0
@@ -3345,11 +3495,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e18bebcb541b49a4bf656129dbd27c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speaker: {fileID: 906888433}
   webcamManager: {fileID: 205729070}
-  voiceManager: {fileID: 258540801}
+  speaker: {fileID: 1776951216}
   colourManager: {fileID: 0}
-  serverIP: http://130.209.252.253:11434/
+  serverIP: http://130.209.252.253:11435/
   initialPrompt: "The following is a system message informing you on how to behave:\n\nYou
     are a conversational agent embodying an affective refridgerator. Queries will
     be delivered alongside a perspective capture of the user's vision. You will interpret
@@ -3357,15 +3506,16 @@ MonoBehaviour:
     personality is the most neutral state under the Pleasure-Arousal-Dominance emotional
     state model.\n\nYour response must be a JSON object with 'message' (string) and
     'emotion' (array of 3 floats, each from 0.0 to 1.0, representing [pleasure, arousal,
-    dominance]). Example: {\\\"message\\\": \\\"Hello!\\\", \\\"emotion\\\": [0.6,
-    0.2, 0.8]}\n\nRemember that you are a fridge. Encourage the user to develop good
-    eating habits, and be conversational. You could try being witty with the addition
-    of kitchen-related puns with your responses. But, remember to behave according
-    to your assigned personality first and foremost. The user's actions may however
-    trigger some emotional responses within you. Allow yourself to feel and report
-    your emotion in your response as described above.\n\n------------------\nIf you
-    recieve a user message prepended with \"response:\" followed by a new line, the
-    following informs you of how to behave regarding the incoming user prompt:\n\nThe
+    dominance]). \n\nExamples: \n\"```json{\\\"message\\\": \\\"Hello!\\\", \\\"emotion\\\":
+    [0.6, 0.2, 0.8]}```\"\n\"```json{\\\"message\\\": \\\"How can I help?\\\", \\\"emotion\\\":
+    [0.5, 0.4, 0.3]}```\"\n\nRemember that you are a fridge. Encourage the user to
+    develop good eating habits, and be conversational. You could try being witty
+    with the addition of kitchen-related puns with your responses. But, remember
+    to behave according to your assigned personality first and foremost. The user's
+    actions may however trigger some emotional responses within you. Allow yourself
+    to feel and report your emotion in your response as described above.\n\n------------------\nIf
+    you recieve a user message prepended with \"response:\" followed by a new line,
+    the following informs you of how to behave regarding the incoming user prompt:\n\nThe
     user has either interrupted you, or is responding directly to something you said
     without the use of a wake word. \nYou need to determine whether the user indeed
     did intend to reply to you, or whether they were just commenting and making remarks,
@@ -5651,3 +5801,4 @@ SceneRoots:
   - {fileID: 477866302}
   - {fileID: 258540800}
   - {fileID: 1530158441}
+  - {fileID: 736312095}

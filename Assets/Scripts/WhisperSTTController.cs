@@ -38,7 +38,7 @@ public class WhisperSTTController : MonoBehaviour, ICommandListener
     [Header("Microphone Settings for Whisper")]
     public int SampleRate = 16000; // Whisper models typically expect 16kHz
     public int MaxRecordingLengthSeconds = 10; // Max duration for a single command capture
-
+    
     void Awake()
     {
         if (Microphone.devices.Length > 0)
@@ -49,21 +49,10 @@ public class WhisperSTTController : MonoBehaviour, ICommandListener
         {
             Debug.LogError("WhisperSTTController: No microphone devices found! Please ensure your Quest has a working mic.");
             enabled = false;
-            return;
         }
-
-        if (whisperManager == null)
-        {
-            whisperManager = FindObjectOfType<WhisperManager>(); 
-            if (whisperManager == null)
-            {
-                Debug.LogError("WhisperSTTController: WhisperManager component not found in scene! Please add it to a GameObject and assign it.");
-                enabled = false;
-            }
-        }
+        
     }
 
-    // Called by WakeWordDetector when "Hey Fridge" is detected
     public void StartListeningForCommand(float duration)
     {
         if (_isRecordingCommand)

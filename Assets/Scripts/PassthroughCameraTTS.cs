@@ -4,7 +4,6 @@ using OpenAI;
 using OpenAI.Chat;
 using OpenAI.Models;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using Meta.WitAi.TTS.Utilities;
 using Newtonsoft.Json.Linq;
 using PassthroughCameraSamples;
