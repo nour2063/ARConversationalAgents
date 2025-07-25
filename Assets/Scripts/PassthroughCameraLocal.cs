@@ -14,6 +14,7 @@ public class PassthroughCameraLocal : MonoBehaviour
     public TTSSpeaker speaker;
     [SerializeField] private WebCamTextureManager webcamManager;
     [SerializeField] private VoiceManager voiceManager;
+    [SerializeField] private ColourManager colourManager;
 
     [Header("Vision Model")] 
     [SerializeField] private string serverIP = "http://localhost:11434/";
@@ -84,9 +85,12 @@ public class PassthroughCameraLocal : MonoBehaviour
             Debug.LogError("ResultText UI not set in PassthroughCameraLocal");
         }
 
+        // Editor debug
         if (image != null)
         {
-            SubmitImage("What do you think of this?");
+            // SubmitImage("What do you see?");
+            // SubmitImage("What have you got for me? Give me a full rundown!");
+            // SubmitImage("What should I make for dinner?");
         } 
     }
 
@@ -102,7 +106,7 @@ public class PassthroughCameraLocal : MonoBehaviour
         {
             userMessage.Content = initialPrompt + "\n \n" + prompt;
         }
-
+        
         if (voiceManager.listening)
         {
             userMessage.Content = responsePrompt + "\n \n" + prompt;
@@ -125,6 +129,7 @@ public class PassthroughCameraLocal : MonoBehaviour
 
         Texture2D[] imagesToSend = null;
 
+        // Editor debug
         if (image != null)
         {
             imagesToSend = new Texture2D[] { image };
@@ -183,16 +188,20 @@ public class PassthroughCameraLocal : MonoBehaviour
 
         var emotion = jsonResponse["emotion"]?.ToObject<float[]>();
         if (emotion is not { Length: 3 }) return;
-
-        // todo: maybe there's a better approach here...
         
         var pleasure = (int)Math.Round(emotion[0]);
         var arousal = (int)Math.Round(emotion[1]);
-        var sadness = (int)Math.Round(emotion[2]);
+        var dominance = (int)Math.Round(emotion[2]);
         
-        var emotionState = (pleasure, arousal, sadness);
+        // todo: this is arbitrary -- figure out how to make colour make sense
+        colourManager.SetColor(0, new Color(0.4f, 1f, 0.4f, pleasure));
+        colourManager.SetColor(1, new Color(0.4f, 0.4f, 1f, arousal));
+        colourManager.SetColor(2, new Color(1f, 0.4f, 0.4f, dominance));
         
-        switch (emotionState)
+        // todo -- TEMPORARY SOLUTION read paper thoroughly and match bursts with P-A
+        var emotionBurst = (pleasure, arousal, dominance);
+        
+        switch (emotionBurst)
         {
             case (0, 0, 0):
                 audioOutput.PlayOneShot(audioData.sadnessClips[randomIndex]);

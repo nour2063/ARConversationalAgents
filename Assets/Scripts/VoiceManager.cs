@@ -10,7 +10,7 @@ using Meta.WitAi.TTS.Utilities;
 
 public class VoiceManager : MonoBehaviour
 {
-    [SerializeField] private PassthroughCameraLocal llmManager;
+    [SerializeField] private PassthroughCameraTTS llmManager;
     
     [Header("Wit Configuration")]
     [SerializeField] private AppVoiceExperience appVoiceExperience;

@@ -222,12 +222,12 @@ GameObject:
   - component: {fileID: 258540802}
   - component: {fileID: 258540801}
   m_Layer: 0
-  m_Name: App Voice Experience
+  m_Name: '[DEPRECATED] App Voice Experience'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &258540799
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -363,11 +363,11 @@ Transform:
   m_GameObject: {fileID: 258540798}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalPosition: {x: 0, y: 0.22000001, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2003447281}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &258540801
 MonoBehaviour:
@@ -381,7 +381,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bb066bf2cddc4de2811a7d208c0f867, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  llmManager: {fileID: 2112861937}
+  llmManager: {fileID: 736312096}
   appVoiceExperience: {fileID: 258540799}
   responseMatcher: {fileID: 258540802}
   transcriptionText: {fileID: 1861760733}
@@ -465,6 +465,38 @@ MonoBehaviour:
   onOutOfDomain:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &381890444
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 381890445}
+  m_Layer: 0
+  m_Name: FeedbackChannels
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &381890445
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 381890444}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 715688555}
+  m_Father: {fileID: 2003447281}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &430897793
 GameObject:
   m_ObjectHideFlags: 0
@@ -801,6 +833,256 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 503252334}
   m_CullTransparentMesh: 1
+--- !u!1 &715688551
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 715688555}
+  - component: {fileID: 715688554}
+  - component: {fileID: 715688553}
+  - component: {fileID: 715688556}
+  m_Layer: 0
+  m_Name: Polygon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!23 &715688553
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 715688551}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 3e175a70cd74d409995887156d0129df, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &715688554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 715688551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d3f9cee0d40c443f9859ee89c7bee25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  idleAnimator: {fileID: 0}
+  detailLevel: 5
+  radius: 1
+  changeAnimDuration: 1
+  changeRotationAmount: 360
+  changeEffectPrefab: {fileID: 0}
+  minParticleColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  maxParticleColor: {r: 1, g: 0, b: 0, a: 1}
+  boingMinScale: 0.3
+  boingMaxOvershoot: 0.3
+  shrinkPhaseRatio: 0.24892312
+  meshChangeOffsetRatio: 0.05
+  overshootRiseRatio: 0.4
+--- !u!4 &715688555
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 715688551}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 381890445}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &715688556
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 715688551}
+  m_Mesh: {fileID: 0}
+--- !u!1 &726743640
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 726743643}
+  - component: {fileID: 726743642}
+  - component: {fileID: 726743641}
+  m_Layer: 0
+  m_Name: WhisperSTTManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &726743641
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 726743640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9370225a2ca94276b870d5f87b0db55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  logLevel: 1
+  modelPath: ggml-base.bin
+  isModelPathInStreamingAssets: 1
+  initOnAwake: 1
+  language: en
+  translateToEnglish: 0
+  strategy: 0
+  noContext: 1
+  singleSegment: 0
+  enableTokens: 0
+  initialPrompt: 
+  stepSec: 3
+  keepSec: 0.2
+  lengthSec: 10
+  updatePrompt: 1
+  dropOldBuffer: 0
+  useVad: 1
+  tokensTimestamps: 0
+  speedUp: 0
+  audioCtx: 0
+--- !u!114 &726743642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 726743640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3b057da02c114e83b847122405c9759, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  whisperManager: {fileID: 726743641}
+  whisperModelFilename: ggml-base.bin
+  OnListeningStartEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 736312096}
+        m_TargetAssemblyTypeName: PassthroughCameraTTS, Assembly-CSharp
+        m_MethodName: CaptureImage
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnTranscriptionSuccessEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2003447282}
+        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
+        m_MethodName: PlayOneShot
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 8300000, guid: 81632135443e849ef94ff83ce6241a92, type: 3}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.AudioClip, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 736312096}
+        m_TargetAssemblyTypeName: PassthroughCameraTTS, Assembly-CSharp
+        m_MethodName: SubmitImage
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnTranscriptionFailedEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2003447282}
+        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
+        m_MethodName: PlayOneShot
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 8300000, guid: 825d675db83354746993acbfca4cfcdd, type: 3}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.AudioClip, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  SampleRate: 16000
+  MaxRecordingLengthSeconds: 10
+--- !u!4 &726743643
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 726743640}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -1.1, z: 0}
+  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2003447281}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &736312093
 GameObject:
   m_ObjectHideFlags: 0
@@ -812,12 +1094,12 @@ GameObject:
   - component: {fileID: 736312095}
   - component: {fileID: 736312096}
   m_Layer: 0
-  m_Name: LLM Manager (OpenAI)
+  m_Name: '[DEPRECATED] LLM Manager (OpenAI)'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &736312095
 Transform:
   m_ObjectHideFlags: 0
@@ -849,46 +1131,39 @@ MonoBehaviour:
   webcamManager: {fileID: 205729070}
   configuration: {fileID: 11400000, guid: 7f9f508d0874348f5bf2aca43b8af753, type: 2}
   voiceManager: {fileID: 258540801}
+  colourManager: {fileID: 0}
   initialPrompt: "The following is a system message informing you on how to behave:\n\nYou
     are a conversational agent embodying an affective refridgerator. Queries will
     be delivered alongside a perspective capture of the user's vision. You will interpret
     what the user sees from your own perspective and respond accordingly.\n\nYour
     personality is the most neutral state under the Pleasure-Arousal-Dominance emotional
-    state model.\n\nTHIS IS VERY IMPORTANT! Your responses should EXCLUSIVELY and
-    ENTIRELY come in the following form:\n[emotion, message]\nemotion is a tuple,
-    and message is a string\n\nEmotion is the approximate mapping of your immediate
-    emotional state under the Pleasure-Arousal-Dominance model. Please put your emotion
-    in the format (x, y, z). Where x is the coordinate of Pleasure, y is the coordinate
-    of Arousal, and z is the coordinate of Dominance. Assume that this is a unitary
-    space, where each value is a floating point between 0 and 1.\n\nMessage is a
-    string message you wish to provide the user with, regarding their prompt. Please
-    encase your message in quotes.\n\nYour response must remain in this format. Output
-    nothing else. And always give a list with a tuple of floating points, and a string
-    message.\n\nThis format is necessary in order to properly process the output
-    you provide. \n\nRemember that you are a fridge. Encourage the user to develop
-    good eating habits, and be conversational. You could try being witty with the
-    addition of kitchen-related puns with your responses. But, remember to behave
-    according to your assigned personality first and foremost. The user's actions
-    may however trigger some emotional responses within you. Allow yourself to feel
-    and report your emotion in your response as described above.\n\n\nHere are some
-    examples of responses:\n\n[(0.5, 0.5, 0.5), \"I'm sorry, I cannot help you with
-    that\"]\n[(0.9, 0.8, 0.1), \"Those tomatoes look fresh! What are you thinking
-    of making?\"]\n[(0.2, 0.4, 0.1), \"That cake looks yummy I suppose...\"]\n\n------------------\n\nIf
-    you recieve a system message labelled \"response\", the following informs you
+    state model.\n\nYour response must be a JSON object with 'message' (string) and
+    'emotion' (array of 3 floats, each from 0.0 to 1.0, representing [pleasure, arousal,
+    dominance]). \n\nExamples: \n\"```json{\\\"message\\\": \\\"Hello!\\\", \\\"emotion\\\":
+    [0.6, 0.2, 0.8]}```\"\n\"```json{\\\"message\\\": \\\"How can I help?\\\", \\\"emotion\\\":
+    [0.5, 0.4, 0.3]}```\"\n\nRemember that you are a fridge. Encourage the user to
+    develop good eating habits, and be conversational. You could try being witty
+    with the addition of kitchen-related puns with your responses. But, remember
+    to behave according to your assigned personality first and foremost. The user's
+    actions may however trigger some emotional responses within you. Allow yourself
+    to feel and report your emotion in your response as described above. Don't use
+    emojis, you are speaking.\n\n------------------\nIf you recieve a user message
+    prepended with \"response:\" followed by a new line, the following informs you
     of how to behave regarding the incoming user prompt:\n\nThe user has either interrupted
     you, or is responding directly to something you said without the use of a wake
-    word. \n\nYou need to determine whether the user indeed did intend to reply to
+    word. \nYou need to determine whether the user indeed did intend to reply to
     you, or whether they were just commenting and making remarks, or if they were
     talking to a third party.\n\nOnly reply to them if they raise a question or mention
     something specific about the previous response you gave them. Otherwise, return
-    no response.\n\nHere are some examples of what they would say when you should
-    be responding:\n\n\"Wait, could you repeat that?\"\n\"I want to know more about...\"\n\"What
+    no response.\nHere are some examples of what they would say when you should be
+    responding:\n\n\"Wait, could you repeat that?\"\n\"I want to know more about...\"\n\"What
     have you got?\"\n\"I'm not sure, maybe you could...\"\n\nHere are some examples
     of what they would say when you should not be responding:\n\n\"Cool.\"\n\"Hmm.\"\n\"All
     right.\"\n\"I'll keep that in mind.\"\n\nThis system message only applies to
     the next user prompt. There may be more in the future. Your personality should
-    play a big role on whether you choose to to respond to the user."
-  responsePrompt: response
+    play a big role on whether you choose to to respond to the user.\n\n------------------\nThe
+    following is the user's initial message:"
+  responsePrompt: 'response:'
   resultText: {fileID: 2095224737}
   audioOutput: {fileID: 2003447282}
   audioData:
@@ -1012,6 +1287,69 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 770448413}
   m_CullTransparentMesh: 1
+--- !u!1 &899311129
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 899311131}
+  - component: {fileID: 899311130}
+  m_Layer: 0
+  m_Name: WakeWordDetector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &899311130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 899311129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8286e2bf368be45588597fb822a59ea1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _picovoiceAccessKey: NhPiGZSaTj7uCTiLY16wN/Xe2jZreJ7JcG4QMKIkEYL4YhEtyv9QOQ==
+  _wakeWordModelFilename: Hey-Fridge-Mac.ppn
+  OnWakeWordDetectedEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2003447282}
+        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
+        m_MethodName: PlayOneShot
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 8300000, guid: 6eb61b4538f114a87a71d3d5947773b4, type: 3}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.AudioClip, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  whisperSTTHandler: {fileID: 726743642}
+  _commandListenDuration: 5
+--- !u!4 &899311131
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 899311129}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -1.1, z: 0}
+  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2003447281}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &906888431
 GameObject:
   m_ObjectHideFlags: 0
@@ -2211,12 +2549,12 @@ GameObject:
   m_Component:
   - component: {fileID: 1530158441}
   m_Layer: 0
-  m_Name: TTS
+  m_Name: '[DEPRECATED] TTS'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1530158441
 Transform:
   m_ObjectHideFlags: 0
@@ -2226,13 +2564,13 @@ Transform:
   m_GameObject: {fileID: 1530158440}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5, y: 5, z: 5}
+  m_LocalPosition: {x: 0, y: 0.22000001, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 945228296}
   - {fileID: 906888432}
-  m_Father: {fileID: 2003447281}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1583159744
 MonoBehaviour:
@@ -2678,9 +3016,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2003447281}
-  - component: {fileID: 2003447280}
-  - component: {fileID: 2003447279}
-  - component: {fileID: 2003447278}
+  - component: {fileID: 2003447283}
   - component: {fileID: 2003447282}
   m_Layer: 0
   m_Name: Body
@@ -2688,81 +3024,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!135 &2003447278
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2003447277}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!23 &2003447279
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2003447277}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &2003447280
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2003447277}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  m_IsActive: 1
 --- !u!4 &2003447281
 Transform:
   m_ObjectHideFlags: 0
@@ -2776,10 +3038,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 381890445}
   - {fileID: 736312095}
+  - {fileID: 899311131}
+  - {fileID: 726743643}
   - {fileID: 2112861936}
-  - {fileID: 258540800}
-  - {fileID: 1530158441}
   m_Father: {fileID: 477866302}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!82 &2003447282
@@ -2879,6 +3142,29 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &2003447283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2003447277}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bb0a614247cf4dc6a576a9148157b13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableIdleAnimation: 1
+  hoverHeight: 0.3
+  hoverSpeed: 0.5
+  breathScale: 0.1
+  breathSpeed: 0.5
+  idleSpinSpeed: 40
+  talkingHoverHeightMultiplier: 0.3
+  talkingBaseBreathSpeed: 2
+  talkingRandomBreathFluctuation: 0.01
+  talkingRandomnessFrequency: 5
+  speaker: {fileID: 906888433}
 --- !u!1 &2095224735
 GameObject:
   m_ObjectHideFlags: 0
@@ -3031,7 +3317,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2112861936
 Transform:
   m_ObjectHideFlags: 0
@@ -3062,6 +3348,7 @@ MonoBehaviour:
   speaker: {fileID: 906888433}
   webcamManager: {fileID: 205729070}
   voiceManager: {fileID: 258540801}
+  colourManager: {fileID: 0}
   serverIP: http://130.209.252.253:11434/
   initialPrompt: "The following is a system message informing you on how to behave:\n\nYou
     are a conversational agent embodying an affective refridgerator. Queries will
@@ -3140,7 +3427,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: c2766dfb5da014475ad5e671a5f35f18, type: 3}
     - {fileID: 8300000, guid: 9369ec415f4dd4e28aaa1072bc567018, type: 3}
     - {fileID: 8300000, guid: 4055a856bd43f481f9b5ff03858e5f7a, type: 3}
-  image: {fileID: 0}
+  image: {fileID: 2800000, guid: c75d7c8cc3b5a4b91af1f038dc7b9bc3, type: 3}
 --- !u!1001 &175305413669649660
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5362,3 +5649,5 @@ SceneRoots:
   - {fileID: 948415963}
   - {fileID: 1634909211}
   - {fileID: 477866302}
+  - {fileID: 258540800}
+  - {fileID: 1530158441}

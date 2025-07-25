@@ -6,8 +6,10 @@ using OpenAI.Models;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Meta.WitAi.TTS.Utilities;
+using Newtonsoft.Json.Linq;
 using PassthroughCameraSamples;
 using TMPro;
+using Exception = System.Exception;
 
 public class PassthroughCameraTTS : MonoBehaviour
 {
@@ -16,6 +18,7 @@ public class PassthroughCameraTTS : MonoBehaviour
     [SerializeField] private WebCamTextureManager webcamManager;
     [SerializeField] private OpenAIConfiguration configuration;
     [SerializeField] private VoiceManager voiceManager;
+    [SerializeField] private ColourManager colourManager;
     
     [Header("Vision Model")]
     [TextArea(30,10)]
@@ -50,22 +53,22 @@ public class PassthroughCameraTTS : MonoBehaviour
     {
         if (webcamManager == null)
         {
-            Debug.LogError("Webcam manager is not set in PassthroughCameraDescription");
+            Debug.LogError("Webcam manager is not set in PassthroughCameraTTS");
         }
 
         if (configuration == null)
         {
-            Debug.LogError("OpenAI Configuration is not set in PassthroughCameraDescription");
+            Debug.LogError("OpenAI Configuration is not set in PassthroughCameraTTS");
         }
 
         if (speaker == null)
         {
-            Debug.LogError("Speaker is not set in PassthroughCameraDescription");
+            Debug.LogError("Speaker is not set in PassthroughCameraTTS");
         }
 
         if (resultText == null)
         {
-            Debug.LogError("ResultText UI is not set in PassthroughCameraDescription");
+            Debug.LogError("ResultText UI is not set in PassthroughCameraTTS");
         }
         
         // Debug
@@ -139,6 +142,8 @@ public class PassthroughCameraTTS : MonoBehaviour
         _chatHistory.Add(new Message(Role.Assistant, response));
 
         resultText.text = response;
+        
+        Debug.Log(result);
         ParseResponse(response);
 
         _processing = false;
@@ -166,25 +171,59 @@ public class PassthroughCameraTTS : MonoBehaviour
         }
     }
 
-    private void ParseResponse(string text)
+    private void ParseResponse(string response)
     {
         Debug.Log("parsing response...");
-        var randomIndex = UnityEngine.Random.Range(0, 9); 
-        
-        const string pattern = @"^\[\((\d+\.?\d*),\s*(\d+\.?\d*),\s*(\d+\.?\d*)\),\s*""([^""]*)""\]$";
-        var match = Regex.Match(text, pattern);
+        var randomIndex = UnityEngine.Random.Range(0, 9);
 
-        if (!match.Success) return;
+        JObject jsonResponse;
         
-        var pleasure = float.Parse(match.Groups[1].Value);
-        var arousal = float.Parse(match.Groups[2].Value);
-        var dominance = float.Parse(match.Groups[3].Value);
-            
-        var message = match.Groups[4].Value;
-            
-        // todo: maybe there's a better approach here...
-        var emotionState = ((int)Math.Round(pleasure), (int)Math.Round(arousal), (int)Math.Round(dominance));
-        switch (emotionState)
+        if (response.StartsWith("```json") && response.EndsWith("```"))
+        {
+            try
+            {
+                jsonResponse = JObject.Parse(response[8..^3]);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"Failed to parse JSON with markdown delimiters: {ex.Message}");
+                jsonResponse = null;
+            }
+        }
+        else
+        {
+            try
+            {
+                jsonResponse = JObject.Parse(response);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to parse JSON directly: {ex.Message}");
+                jsonResponse = null;
+            }
+        }
+
+        if (jsonResponse == null)
+        {
+            Debug.LogError("Could not parse JSON from the response string.");
+        }
+
+        var emotion = jsonResponse["emotion"]?.ToObject<float[]>();
+        if (emotion is not { Length: 3 }) return;
+        
+        var pleasure = (int)Math.Round(emotion[0]);
+        var arousal = (int)Math.Round(emotion[1]);
+        var dominance = (int)Math.Round(emotion[2]);
+        
+        // todo: this is arbitrary -- figure out how to make colour make sense
+        colourManager.SetColor(0, new Color(0.4f, pleasure, 0.4f, 1f)); // green
+        colourManager.SetColor(1, new Color(0.4f, 0.4f, arousal, 1f)); // blue
+        colourManager.SetColor(2, new Color(dominance, 0.4f, 0.4f, 1f)); // red
+        
+        // todo -- TEMPORARY SOLUTION read paper thoroughly and match bursts with P-A
+        var emotionBurst = (pleasure, arousal, dominance);
+        
+        switch (emotionBurst)
         {
             case (0, 0, 0):
                 audioOutput.PlayOneShot(audioData.sadnessClips[randomIndex]);
@@ -203,8 +242,13 @@ public class PassthroughCameraTTS : MonoBehaviour
                 audioOutput.PlayOneShot(audioData.fearClips[randomIndex]);
                 break;
         }
-            
+
+        var message = (string)jsonResponse["message"];
+        Debug.Log(message);
+        
+        resultText.text = message;
         speaker.SpeakQueued(message);
+        _processing = false;
     }
     
     public void ClearChatHistory()

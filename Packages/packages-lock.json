@@ -484,6 +484,13 @@
       },
       "url": "https://package.openupm.com"
     },
+    "com.whisper.unity": {
+      "version": "https://github.com/saurabhchalke/whisper-meta-quest.git?path=/Packages/com.whisper.unity",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "94ca4f44287f41df15cf607df9138b52adc1fc22"
+    },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,
