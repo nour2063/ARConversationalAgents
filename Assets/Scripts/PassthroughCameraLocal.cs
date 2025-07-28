@@ -181,8 +181,17 @@ public class PassthroughCameraLocal : MonoBehaviour
     {
         Debug.Log("parsing response...");
         var randomIndex = UnityEngine.Random.Range(0, 9);
+
+        JObject jsonResponse;
         
-        var jsonResponse = JObject.Parse(response[8..^3]);
+        try
+        {
+            jsonResponse = JObject.Parse(response[8..^3]);
+        }
+        catch
+        {
+            return; // no emotion to give.
+        }
 
         var emotion = jsonResponse["emotion"]?.ToObject<float[]>();
         if (emotion is not { Length: 3 }) return;

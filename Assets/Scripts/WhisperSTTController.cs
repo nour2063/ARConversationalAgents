@@ -207,4 +207,9 @@ public class WhisperSTTController : MonoBehaviour
         }
         CancelInvoke();
     }
+
+    public bool IsListeningForCommand()
+    {
+        return _isRecordingCommand;
+    }
 }
