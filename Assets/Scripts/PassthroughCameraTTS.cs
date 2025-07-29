@@ -17,7 +17,6 @@ public class PassthroughCameraTTS : MonoBehaviour
     [SerializeField] private WebCamTextureManager webcamManager;
     [SerializeField] private OpenAIConfiguration configuration;
     [SerializeField] private VoiceManager voiceManager;
-    [SerializeField] private ColourManager colourManager;
     
     [Header("Vision Model")]
     [TextArea(30,10)]
@@ -215,9 +214,9 @@ public class PassthroughCameraTTS : MonoBehaviour
         var dominance = (int)Math.Round(emotion[2]);
         
         // todo: this is arbitrary -- figure out how to make colour make sense
-        colourManager.SetColor(0, new Color(0.4f, pleasure, 0.4f, 1f)); // green
-        colourManager.SetColor(1, new Color(0.4f, 0.4f, arousal, 1f)); // blue
-        colourManager.SetColor(2, new Color(dominance, 0.4f, 0.4f, 1f)); // red
+        // colourManager.SetColor(0, new Color(0.4f, pleasure, 0.4f, 1f)); // green
+        // colourManager.SetColor(1, new Color(0.4f, 0.4f, arousal, 1f)); // blue
+        // colourManager.SetColor(2, new Color(dominance, 0.4f, 0.4f, 1f)); // red
         
         // todo -- TEMPORARY SOLUTION read paper thoroughly and match bursts with P-A
         var emotionBurst = (pleasure, arousal, dominance);

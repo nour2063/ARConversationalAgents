@@ -110,8 +110,6 @@ public class AdaptiveWaveform : MonoBehaviour
             float angle = (float)i / segments * 2f * Mathf.PI;
             float x = Mathf.Cos(angle) * radius;
             float z = Mathf.Sin(angle) * radius;
-            
-            // --- NEW BLENDING LOGIC ---
 
             // A. Calculate the Sine Wave component (for Idle/Listening)
             float sineY = Mathf.Sin((angle * currentWaveFrequency) + timeOffset) * currentAmplitude;

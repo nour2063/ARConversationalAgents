@@ -6,8 +6,6 @@ using System.Collections; // Required for IEnumerator
 [RequireComponent(typeof(MeshRenderer))]
 public class PolygonalSphereGenerator : MonoBehaviour
 {
-    [SerializeField] private IdleAnimator idleAnimator; 
-    
     [Tooltip("Controls the polygonal detail. Higher values = more perfect sphere. 0 or 1 for very low poly.")]
     [Range(0, 32)]
     public int detailLevel = 16;
@@ -35,22 +33,19 @@ public class PolygonalSphereGenerator : MonoBehaviour
     private ParticleSystem activeParticleSystem;
     private Coroutine changeAnimationCoroutine;
 
-    private Vector3 initialPosition;
     private Vector3 initialScale;
     private Quaternion initialRotation; // This will be the resting rotation
 
 
     void Awake()
     {
-        // Primary initialization: This is the ONLY place Mesh and MeshFilter.mesh are created and assigned.
         meshFilter = GetComponent<MeshFilter>();
-        if (mesh == null) // Create new Mesh object only if it hasn't been instantiated yet
+        if (mesh == null)
         {
             mesh = new Mesh();
         }
-        meshFilter.mesh = mesh; // Assign the Mesh to the MeshFilter
+        meshFilter.mesh = mesh;
 
-        // Remove physics components if they somehow exist from previous iterations, to ensure no conflict.
         Rigidbody existingRb = GetComponent<Rigidbody>();
         if (existingRb != null) Destroy(existingRb);
 
@@ -60,9 +55,6 @@ public class PolygonalSphereGenerator : MonoBehaviour
 
     void OnValidate()
     {
-        // IMPORTANT: OnValidate can run before Awake. We cannot safely assign meshFilter.mesh
-        // or create new Mesh objects here if they are null, due to Unity's "SendMessage" error.
-        // We only proceed if meshFilter and mesh are ALREADY initialized (from Awake, or preserved state).
         if (meshFilter != null && mesh != null)
         {
             if (Application.isPlaying)
@@ -75,7 +67,6 @@ public class PolygonalSphereGenerator : MonoBehaviour
             }
             else
             {
-                // In Editor (not playing), generate instantly for preview, IF components are ready.
                 GeneratePolygonalSphereInstant();
             }
         }
@@ -83,28 +74,21 @@ public class PolygonalSphereGenerator : MonoBehaviour
 
     void Start()
     {
-        // Capture initial transform values. These are the "home" values for all animations.
-        initialPosition = transform.position;
         initialScale = transform.localScale;
-        initialRotation = transform.rotation; // Capture initial rotation
+        initialRotation = transform.rotation;
 
-        // Generate the initial sphere mesh when the game starts.
         GeneratePolygonalSphereInstant();
     }
 
-    // This method ONLY updates the MeshFilter's mesh data. It does NOT create Mesh objects
-    // or assign them to meshFilter.mesh. It assumes 'mesh' is already valid.
     void GeneratePolygonalSphereInstant()
     {
-        // Mesh should be initialized by Awake(). If this is called from OnValidate before Awake,
-        // it might still be null, but OnValidate guards against that.
-        if (!mesh)
+        if (mesh == null)
         {
             Debug.LogError("Mesh object is null in GeneratePolygonalSphereInstant. This should not happen if called correctly.");
             return;
         }
 
-        mesh.Clear(); // Clear any existing data in *our* Mesh object
+        mesh.Clear();
 
         List<Vector3> vertices = new List<Vector3>();
         List<int> triangles = new List<int>();
@@ -114,14 +98,13 @@ public class PolygonalSphereGenerator : MonoBehaviour
 
         GenerateUVSphere(ref vertices, ref triangles, latSegments, longSegments);
 
-        // Assign generated data to the mesh
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
 
-        // Recalculate properties for proper rendering
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
     }
+
 
     void GenerateUVSphere(ref List<Vector3> vertices, ref List<int> triangles, int latSegments, int longSegments)
     {
@@ -142,41 +125,54 @@ public class PolygonalSphereGenerator : MonoBehaviour
         }
         vertices.Add(Vector3.down * radius);
 
+        // --- Triangle generation ---
+        // --- Top cap triangles (CLOCKWISE when looking DOWN from North Pole) ---
+        // Connect North Pole (index 0) to the first ring of vertices (indices 1 to longSegments)
+        int firstRingStartIndex = 1;
         for (int i = 0; i < longSegments; i++)
         {
-            triangles.Add(0);
-            triangles.Add(1 + ((i + 1) % longSegments));
-            triangles.Add(1 + i);
+            triangles.Add(0); // North Pole
+            triangles.Add(firstRingStartIndex + i); // Current vertex on the first ring
+            triangles.Add(firstRingStartIndex + ((i + 1) % longSegments)); // Next vertex on the first ring (wraps around)
         }
 
-        int ringVertexCount = longSegments + 1;
-        for (int lat = 0; lat < latSegments - 2; lat++)
+        // --- Middle section triangles (forming quads from two triangles) ---
+        // Ensure consistent winding (e.g., clockwise)
+        int ringVertexCount = longSegments + 1; // Number of vertices in each latitude ring (including duplicated end vertex)
+        for (int lat = 0; lat < latSegments - 2; lat++) // Loop through latitude strips (excluding top/bottom caps)
         {
-            for (int lon = 0; lon < longSegments; lon++)
+            for (int lon = 0; lon < longSegments; lon++) // Loop through longitude segments within a strip
             {
                 int currentTopLeft = 1 + lat * ringVertexCount + lon;
                 int currentTopRight = currentTopLeft + 1;
                 int currentBottomLeft = currentTopLeft + ringVertexCount;
-                int currentBottomRight = currentTopLeft + ringVertexCount + 1; // Corrected calculation for currentBottomRight
+                int currentBottomRight = currentTopLeft + ringVertexCount + 1; 
 
+                // First triangle of the quad (Top-Left, Bottom-Left, Bottom-Right)
+                // This creates a clockwise triangle when looking at the outside face.
                 triangles.Add(currentTopLeft);
                 triangles.Add(currentBottomLeft);
-                triangles.Add(currentTopRight);
-
-                triangles.Add(currentTopRight);
-                triangles.Add(currentBottomLeft);
                 triangles.Add(currentBottomRight);
+
+                // Second triangle of the quad (Top-Left, Bottom-Right, Top-Right)
+                // This completes the quad with another clockwise triangle.
+                triangles.Add(currentTopLeft);
+                triangles.Add(currentBottomRight);
+                triangles.Add(currentTopRight);
             }
         }
 
+        // --- Bottom cap triangles (CLOCKWISE when looking UP from South Pole) ---
+        // Connect South Pole (last index) to the last ring of vertices
         int southPoleIndex = vertices.Count - 1;
-        int lastRingStartIndex = southPoleIndex - ringVertexCount;
+        int lastRingStartIndex = southPoleIndex - ringVertexCount; // Start index of the ring just above South Pole
 
         for (int i = 0; i < longSegments; i++)
         {
-            triangles.Add(southPoleIndex);
-            triangles.Add(lastRingStartIndex + (i + 1));
-            triangles.Add(lastRingStartIndex + i);
+            triangles.Add(southPoleIndex); // South Pole
+            // REVERTED TO PREVIOUS WORKING ORDER FOR BOTTOM CAP
+            triangles.Add(lastRingStartIndex + (i + 1)); // Next vertex on the last ring (wraps around)
+            triangles.Add(lastRingStartIndex + i); // Current vertex on the last ring
         }
     }
 
@@ -189,14 +185,11 @@ public class PolygonalSphereGenerator : MonoBehaviour
         return 0.5f * (t * t * t * t * t + 2f);
     }
     
-    private IEnumerator DoChangeShapeAndAnimate()
+    public IEnumerator DoChangeShapeAndAnimate()
     {
-        // Capture initial rotation at the start (animStartRot)
-        // No need for animTargetRot for Slerp as we use transform.Rotate
-
         // Calculate continuous spin rate for the change animation
-        // This makes it spin 'changeRotationAmount' degrees over 'changeAnimDuration'
         float changeSpinRateDegreesPerSecond = changeRotationAmount / changeAnimDuration;
+
 
         // --- Flare: Play Particle Effect at the start ---
         if (changeEffectPrefab)
@@ -208,7 +201,7 @@ public class PolygonalSphereGenerator : MonoBehaviour
             }
             activeParticleSystem = Instantiate(changeEffectPrefab, transform.position, Quaternion.identity);
             var mainModule = activeParticleSystem.main;
-            float lerpVal = detailLevel / 32f;
+            float lerpVal = (float)detailLevel / 32f; // Ensure float division
             mainModule.startColor = Color.Lerp(minParticleColor, maxParticleColor, lerpVal);
             activeParticleSystem.Play();
         }
@@ -225,7 +218,6 @@ public class PolygonalSphereGenerator : MonoBehaviour
         while (timer < changeAnimDuration) // Use changeAnimDuration directly
         {
             float animProgress = timer / changeAnimDuration; // Normalized total progress (0 to 1)
-            // No specific easedAnimProgress needed for Slerp anymore, as we use transform.Rotate.
 
 
             // --- ROTATION: Use transform.Rotate for continuous spin (as per working version) ---
@@ -263,7 +255,7 @@ public class PolygonalSphereGenerator : MonoBehaviour
                 // Clamp progress to ensure it hits 1.0 exactly at the end
                 phaseProgress = Mathf.Clamp01(phaseProgress);
                 
-                float easedProgress = EaseInOutQuint(phaseProgress); // Using EaseInOutQuint for settling (CORRECTED USAGE)
+                float easedProgress = EaseInOutQuint(phaseProgress); // Using EaseInOutQuint for settling
 
                 currentScaleMultiplier = Mathf.Lerp(1f + boingMaxOvershoot, 1f, easedProgress);
             }
@@ -276,8 +268,6 @@ public class PolygonalSphereGenerator : MonoBehaviour
         }
 
         // --- Final Reset: Ensures exact initial state after animation ---
-        // For transform.rotation, it has been continuously rotating. We snap it back to initialRotation.
-        transform.position = initialPosition;
         transform.rotation = initialRotation; // Snap back to the true initialRotation for consistency
         transform.localScale = initialScale; 
 
