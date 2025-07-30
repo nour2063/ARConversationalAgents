@@ -3,13 +3,20 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
-using Oculus.Platform;
 using PassthroughCameraSamples;
 using TMPro;
 using ollama;
+using UnityEngine.Serialization;
+using Random = System.Random;
 
 public class PassthroughCameraLocal : MonoBehaviour
 {
+    [Header("Feedback Settings")] 
+    [SerializeField] private bool blob;
+    [SerializeField] private bool face;
+    [SerializeField] private bool color;
+    [SerializeField] private bool sound;
+    
     [Header("References")] 
     [SerializeField] private WebCamTextureManager webcamManager;
     [SerializeField] private LocalNetworkTTS speaker;
@@ -20,14 +27,19 @@ public class PassthroughCameraLocal : MonoBehaviour
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
     [SerializeField] private string responsePrompt = "response";
     
+    [FormerlySerializedAs("polygon")]
+    [Space(10)]
+    [Header("Face Settings")]
+    [SerializeField] private FaceController faceController;
+    
     [Space(10)] 
-    [Header("Blob Colour Settings")] 
-    [SerializeField] private ColorManager polygon;
-    [SerializeField] private ColorManager shell;
-    [SerializeField] private ColorManager waveform1;
-    [SerializeField] private ColorManager waveform2;
+    [Header("Blob Color Settings")] 
+    [SerializeField] private ColorManager polygonColor;
+    [SerializeField] private ColorManager shellColor;
+    [SerializeField] private ColorManager waveform1Color;
+    [SerializeField] private ColorManager waveform2Color;
 
-    [Header("Pleasure -> Color Gradient")]
+    [Header("Pleasure -> Hue Gradient")]
     [Tooltip("Maps Pleasure (0-1) to this color gradient.")]
     public Gradient pleasureGradient;
 
@@ -36,7 +48,7 @@ public class PassthroughCameraLocal : MonoBehaviour
     [Range(0f, 1f)] public float saturationMin = 0.4f;
     [Range(0f, 1f)] public float saturationMax = 1.0f;
 
-    [Header("Dominance -> Control")]
+    [Header("Dominance -> Shell Transparency")]
     [Tooltip("Maps Dominance (0-1) to the Shell's Alpha.")]
     [Range(0f, 1f)] public float shellAlphaMin = 0.1f;
     [Range(0f, 1f)] public float shellAlphaMax = 0.9f;
@@ -46,24 +58,25 @@ public class PassthroughCameraLocal : MonoBehaviour
     [SerializeField] private AdaptiveWaveform wave1;
     [SerializeField] private AdaptiveWaveform wave2;
     [Header("Arousal -> Amplitude")]
-    public float amplitudeMin = 0.2f;
-    public float amplitudeMax = 1.5f;
+    [SerializeField] private float amplitudeMin = 0.2f;
+    [SerializeField] private float amplitudeMax = 1.5f;
 
     [Header("Arousal -> Noise Speed")]
-    public float noiseSpeedMin = 1f;
-    public float noiseSpeedMax = 5f;
+    [SerializeField] private float noiseSpeedMin = 1f;
+    [SerializeField] private float noiseSpeedMax = 5f;
 
+    [FormerlySerializedAs("noiseScaleMin_Pleasant")]
     [Header("Pleasure -> Noise Scale (Jaggedness)")]
     [Tooltip("Lower values are smoother, higher values are more jagged.")]
-    public float noiseScaleMin_Pleasant = 5f;
-    public float noiseScaleMax_Unpleasant = 20f;
+    [SerializeField] private float noiseScaleMinPleasant = 1f;
+    [SerializeField] private float noiseScaleMaxUnpleasant = 5f;
     
     [Header("Dominance -> Rotation Speed")]
-    public float rotationSpeedMin = 0f;
-    public float rotationSpeedMax = 0.5f;
+    [SerializeField] private float rotationSpeedMin = 0.25f;
+    [SerializeField] private float rotationSpeedMax = 1f;
 
     [Space(10)]
-    [Header("Arousal -> Blob Poly Count")]
+    [Header("Blob Poly Count")]
     [Tooltip("Lower values are more acute, higher values are more smooth.")]
     [SerializeField] private PolygonalSphereGenerator polygonShape;
     [SerializeField] private PolygonalSphereGenerator shellShape;
@@ -251,31 +264,42 @@ public class PassthroughCameraLocal : MonoBehaviour
         var arousal = (int)Math.Round(emotion[1]);
         var dominance = (int)Math.Round(emotion[2]);
 
-        SetColors(pleasure, arousal, dominance);
-        SetWaveformProperties(pleasure, arousal, dominance);
-        SetLoD(arousal);
-        
-        // todo -- TEMPORARY SOLUTION read paper thoroughly and match bursts with P-A ONLY REMOVE D
-        var emotionBurst = (pleasure, arousal, dominance);
-        
-        switch (emotionBurst)
+        if (blob)
         {
-            case (0, 0, 0):
-                audioOutput.PlayOneShot(audioData.sadnessClips[randomIndex]);
-                break;
-            case (1, 0, 0):
-            case (1, 1, 0):
-            case (1, 1, 1):
-                audioOutput.PlayOneShot(audioData.happinessClips[randomIndex]);
-                break;
-            case (0, 0, 1): 
-            case (1, 0, 1):
-            case (0, 1, 1):
-                audioOutput.PlayOneShot(audioData.neutralClips[randomIndex]);
-                break;
-            case (0, 1, 0):
-                audioOutput.PlayOneShot(audioData.fearClips[randomIndex]);
-                break;
+            SetColors(pleasure, arousal, dominance);
+            SetWaveformProperties(pleasure, arousal, dominance);
+            SetLoD(arousal);
+        }
+
+        // if (face)
+        // {
+        //     faceController.SetFaceExpression();
+        // }
+
+        if (sound)
+        {
+            // todo -- TEMPORARY SOLUTION read paper thoroughly and match bursts with P-A ONLY REMOVE D
+            var emotionBurst = (pleasure, arousal, dominance);
+        
+            switch (emotionBurst)
+            {
+                case (0, 0, 0):
+                    audioOutput.PlayOneShot(audioData.sadnessClips[randomIndex]);
+                    break;
+                case (1, 0, 0):
+                case (1, 1, 0):
+                case (1, 1, 1):
+                    audioOutput.PlayOneShot(audioData.happinessClips[randomIndex]);
+                    break;
+                case (0, 0, 1): 
+                case (1, 0, 1):
+                case (0, 1, 1):
+                    audioOutput.PlayOneShot(audioData.neutralClips[randomIndex]);
+                    break;
+                case (0, 1, 0):
+                    audioOutput.PlayOneShot(audioData.fearClips[randomIndex]);
+                    break;
+            }
         }
 
         var message = (string)jsonResponse["message"];
@@ -305,6 +329,53 @@ public class PassthroughCameraLocal : MonoBehaviour
     // 
     // Mapping Dominance to Contrast and Transparency
     // Ware, C. (2021). Information Visualization: Perception for Design (4th ed.). Morgan Kaufmann Publishers Inc.
+
+
+    private void SetFace(float p, float a, float d)
+    {
+        var pad = (p, a, d);   
+        var possibleEmotions = new List<string>();
+
+        // --- Neutral ---
+        if (pad is { p: >= 0.5f, a: < 0.5f })
+        {
+            possibleEmotions.Add("neutral");
+        }
+
+        // --- Happy ---
+        if (pad is { p: >= 0.5f, a: >= 0.5f })
+        {
+            possibleEmotions.Add("happy");
+        }
+
+        // --- Angry ---
+        if (pad is { p: < 0.5f, a: >= 0.5f, d: >= 0.5f })
+        {
+            possibleEmotions.Add("angry");
+        }
+
+        // --- Sad ---
+        if (pad is { p: < 0.5f, a: < 0.5f })
+        {
+            possibleEmotions.Add("sad");
+        }
+
+        // --- Scared ---
+        if (pad is { p: < 0.5f, a: >= 0.5f, d: < 0.5f })
+        {
+            possibleEmotions.Add("scared");
+        }
+
+        // --- Surprised (secondary classification) ---
+        if (pad.a >= 0.7f)
+        {
+            possibleEmotions.Add("surprised");
+        }
+        
+        var random = new Random();
+        var randomIndex = random.Next(0, possibleEmotions.Count);
+        faceController.SetFaceExpression(possibleEmotions[randomIndex]); 
+    }
     
     private void SetColors(float p, float a, float d)
     {
@@ -328,10 +399,10 @@ public class PassthroughCameraLocal : MonoBehaviour
         Color complementaryColor = Color.HSVToRGB(complementaryHue, s, v);
         Color waveform2Color = Color.Lerp(polygonColor, complementaryColor, d);
         
-        polygon.SetColor(polygonColor);
-        shell.SetColor(shellColor);
-        waveform1.SetColor(waveform1Color);
-        waveform2.SetColor(waveform2Color);
+        this.polygonColor.SetColor(polygonColor);
+        this.shellColor.SetColor(shellColor);
+        this.waveform1Color.SetColor(waveform1Color);
+        this.waveform2Color.SetColor(waveform2Color);
     }
     
     private void SetWaveformProperties(float p, float a, float d)
@@ -347,7 +418,7 @@ public class PassthroughCameraLocal : MonoBehaviour
         
         // Pleasure controls noise scale.
         // We invert the lerp: low pleasure = high scale (jagged), high pleasure = low scale (smooth).
-        var noiseScale = Mathf.Lerp(noiseScaleMax_Unpleasant, noiseScaleMin_Pleasant, p);
+        var noiseScale = Mathf.Lerp(noiseScaleMaxUnpleasant, noiseScaleMinPleasant, p);
         wave1.noiseScale = noiseScale;
         wave2.noiseScale = noiseScale;
 
