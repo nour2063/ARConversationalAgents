@@ -213,12 +213,10 @@ public class PassthroughCameraTTS : MonoBehaviour
         var arousal = (int)Math.Round(emotion[1]);
         var dominance = (int)Math.Round(emotion[2]);
         
-        // todo: this is arbitrary -- figure out how to make colour make sense
         // colourManager.SetColor(0, new Color(0.4f, pleasure, 0.4f, 1f)); // green
         // colourManager.SetColor(1, new Color(0.4f, 0.4f, arousal, 1f)); // blue
         // colourManager.SetColor(2, new Color(dominance, 0.4f, 0.4f, 1f)); // red
         
-        // todo -- TEMPORARY SOLUTION read paper thoroughly and match bursts with P-A
         var emotionBurst = (pleasure, arousal, dominance);
         
         switch (emotionBurst)

@@ -9,14 +9,15 @@ using ollama;
 using UnityEngine.Serialization;
 using Random = System.Random;
 
-public class PassthroughCameraLocal : MonoBehaviour
+public class OllamaManager : MonoBehaviour
 {
     [Header("Feedback Settings")] 
     [SerializeField] private GameObject blobObject;
     [SerializeField] private GameObject faceObject;
     [SerializeField] private bool blob;
     [SerializeField] private bool face;
-    // [SerializeField] private bool color; // todo color only option
+    [SerializeField] private bool thought; // kept part of facial expression mode
+    [SerializeField] private bool color;
     [SerializeField] private bool sound;
     
     [Header("References")] 
@@ -28,11 +29,14 @@ public class PassthroughCameraLocal : MonoBehaviour
     [TextArea(30,10)]
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
     [SerializeField] private string responsePrompt = "response";
-    
-    [FormerlySerializedAs("polygon")]
-    [Space(10)]
+
+    [Space(10)] 
     [Header("Face Settings")]
     [SerializeField] private FaceController faceController;
+    [SerializeField] private ThoughtBubbleController thoughtBubbleController;
+    [SerializeField] private ColorManager faceBlush;
+    [Range(0f, 1f)] [SerializeField] private float blushAlphaMin = 0.3f;
+    [Range(0f, 1f)] [SerializeField] private float blushAlphaMax = 0.9f;
     
     [Space(10)] 
     [Header("Blob Color Settings")] 
@@ -282,16 +286,47 @@ public class PassthroughCameraLocal : MonoBehaviour
         
         if (blob)
         {
-            SetColors(pleasure, arousal, dominance);
             SetWaveformProperties(pleasure, arousal, dominance);
             SetLoD(pleasure);
             SetIdleSpeed(arousal);
+            if (color)
+            {
+                SetBlobColors(pleasure, arousal, dominance);
+            }
         }
 
         if (face)
         {
             var expression = GetExpression(pleasure, arousal, dominance);
-            faceController.SetFaceExpression(expression); 
+            faceController.SetFaceExpression(expression);
+            
+            if (color)
+            {
+                SetBlush(pleasure, arousal, dominance);
+            }   
+            
+            if (thought)
+            {
+                switch (expression)
+                {
+                    case "happy":
+                        thoughtBubbleController.ShowHappyThought();
+                        Debug.Log("SHOWING HAPPY THOUGHT");
+                        break;
+                    case "sad":
+                        thoughtBubbleController.ShowSadThought();
+                        break;
+                    case "angry":
+                        thoughtBubbleController.ShowAngryThought();
+                        break;
+                    case "scared":
+                        thoughtBubbleController.ShowScaredThought();
+                        break;
+                    case "surprised":
+                        thoughtBubbleController.ShowSurprisedThought();
+                        break;
+                }
+            }
         }
 
         if (sound)
@@ -449,17 +484,17 @@ public class PassthroughCameraLocal : MonoBehaviour
     // Mapping Dominance to Contrast and Transparency
     // Ware, C. (2021). Information Visualization: Perception for Design (4th ed.). Morgan Kaufmann Publishers Inc.
     
-    private void SetColors(float p, float a, float d)
+    private void SetBlobColors(float p, float a, float d)
     {
-        // 1. PLEASURE -> HUE
+        // 1. Pleasure -> Hue
         var baseColor = pleasureGradient.Evaluate(p);
         Color.RGBToHSV(baseColor, out var h, out var s, out var v);
 
-        // 2. AROUSAL -> SATURATION
+        // 2. Arousal -> Saturation
         s = Mathf.Lerp(saturationMin, saturationMax, a);
         var newColor = Color.HSVToRGB(h, s, v);
 
-        // 3. DOMINANCE -> ALPHA & CONTRAST
+        // 3. Dominance -> Alpha & Contrast
         var shellAlpha = Mathf.Lerp(shellAlphaMin, shellAlphaMax, d);
         var newShellColor = new Color(newColor.r, newColor.g, newColor.b, shellAlpha);
 
@@ -471,6 +506,23 @@ public class PassthroughCameraLocal : MonoBehaviour
         shellColor.SetColor(newShellColor);
         waveform1Color.SetColor(newColor);
         waveform2Color.SetColor(newWaveformColor);
+    }
+
+    private void SetBlush(float p, float a, float d)
+    {
+        // 1. Pleasure -> Hue
+        var baseColor = pleasureGradient.Evaluate(p);
+        Color.RGBToHSV(baseColor, out var h, out var s, out var v);
+        
+        // 2. Arousal -> Saturation
+        s = Mathf.Lerp(saturationMin, saturationMax, a);
+        var saturatedColor = Color.HSVToRGB(h, s, v);
+        
+        // 3. Dominance -> Alpha & Contrast
+        var alpha = Mathf.Lerp(blushAlphaMin, blushAlphaMax, d);
+        var finalColor = new Color(saturatedColor.r, saturatedColor.g, saturatedColor.b, alpha);
+        
+        faceBlush.SetColor(finalColor);
     }
     
     
