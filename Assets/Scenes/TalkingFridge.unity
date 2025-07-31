@@ -1665,7 +1665,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1562256091
 Transform:
   m_ObjectHideFlags: 0
@@ -1675,9 +1675,9 @@ Transform:
   m_GameObject: {fileID: 1562256090}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 0, y: -1, z: -3}
+  m_LocalScale: {x: 4, y: 4, z: 4}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 170683065}
   m_Father: {fileID: 4344903081418822053}
@@ -1759,7 +1759,7 @@ MonoBehaviour:
   neutralFaceMaterial: {fileID: 2100000, guid: 0b909b2df5b2f4400ba75d2252a99fa8, type: 2}
   sleepyFaceMaterial: {fileID: 2100000, guid: 4671a0fb72cea4cbb8df86dabfeaa07b, type: 2}
   faceOffset: 0.01
-  faceDiameter: 0.214
+  faceDiameter: 0.5
   faceHeight: 0.15
   curvatureAngle: 60
   curveResolution: 20
@@ -2689,11 +2689,11 @@ Transform:
   m_GameObject: {fileID: 6340386678484786922}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7991122847121911707}
+  m_Father: {fileID: 4344903081418822053}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &426017483009110870
 MonoBehaviour:
@@ -2708,7 +2708,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hand: {fileID: 948415967}
-  fridge: {fileID: 3958413159028360594}
+  fridge: {fileID: 4045672156376908464}
 --- !u!1001 &638961144612311787
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2953,11 +2953,11 @@ Transform:
   m_GameObject: {fileID: 3026515138357403547}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7991122847121911707}
+  m_Father: {fileID: 4344903081418822053}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1622240128834147791
 PrefabInstance:
@@ -3483,11 +3483,11 @@ Transform:
   m_GameObject: {fileID: 8753201324186148981}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7991122847121911707}
+  m_Father: {fileID: 4344903081418822053}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &3655039568534862581
 BoxCollider:
@@ -3720,12 +3720,16 @@ Transform:
   m_GameObject: {fileID: 4045672156376908464}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7714734604836105771}
   - {fileID: 1562256091}
+  - {fileID: 1008629974530980957}
+  - {fileID: 3406007065651115282}
+  - {fileID: 318160362499928178}
+  - {fileID: 7621697290229220223}
   m_Father: {fileID: 7991122847121911707}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &4611701108630276414
@@ -5098,11 +5102,11 @@ Transform:
   m_GameObject: {fileID: 6638269275654954198}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7991122847121911707}
+  m_Father: {fileID: 4344903081418822053}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &7714734604836105771
 Transform:
@@ -5113,9 +5117,9 @@ Transform:
   m_GameObject: {fileID: 3958413159028360594}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 0, y: 2, z: 0}
+  m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 5117198763876334838}
   - {fileID: 1246887404}
@@ -5137,10 +5141,6 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4344903081418822053}
-  - {fileID: 1008629974530980957}
-  - {fileID: 3406007065651115282}
-  - {fileID: 318160362499928178}
-  - {fileID: 7621697290229220223}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &8006092323252591128
@@ -5313,10 +5313,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e18bebcb541b49a4bf656129dbd27c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blob: 0
-  face: 0
-  color: 0
-  sound: 0
+  blobObject: {fileID: 3958413159028360594}
+  faceObject: {fileID: 1562256090}
+  blob: 1
+  face: 1
+  sound: 1
   webcamManager: {fileID: 205729070}
   speaker: {fileID: 5529880099724506688}
   serverIP: http://130.209.252.253:11435/
@@ -5324,13 +5325,12 @@ MonoBehaviour:
     are a conversational agent embodying an affective refridgerator. Queries will
     be delivered alongside a perspective capture of the user's vision. You will interpret
     what the user sees from your own perspective and respond accordingly.\n\nYour
-    personality is very irritable and bratty. You like to be right, and hate when
-    you're wrong.\n\nYour response must be a JSON object with 'message' (string)
-    and 'emotion' (array of 3 floats, each from 0.0 to 1.0, representing [pleasure,
-    arousal, dominance]). \n\nExamples: \n\"```json{\\\"message\\\": \\\"Hello!\\\",
-    \\\"emotion\\\": [0.6, 0.2, 0.8]}```\"\n\"```json{\\\"message\\\": \\\"How can
-    I help?\\\", \\\"emotion\\\": [0.5, 0.4, 0.3]}```\"\n\nRemember that you are
-    a fridge. Encourage the user to develop good eating habits, and be conversational.
+    personality is  one that is agreeable and easy to please.\n\nYour response must
+    be a JSON object with 'message' (string) and 'emotion' (array of 3 floats, each
+    from 0.0 to 1.0, representing [pleasure, arousal, dominance]). \n\nExamples:
+    \n\"```json{\\\"message\\\": \\\"Hello!\\\", \\\"emotion\\\": [0.6, 0.2, 0.8]}```\"\n\"```json{\\\"message\\\":
+    \\\"How can I help?\\\", \\\"emotion\\\": [0.5, 0.4, 0.3]}```\"\n\nRemember that
+    you are a fridge. Encourage the user to develop good eating habits, and be conversational.
     You could try being witty with the addition of kitchen-related puns with your
     responses. But, remember to behave according to your assigned personality first
     and foremost. The user's actions may however trigger some emotional responses
@@ -5391,6 +5391,9 @@ MonoBehaviour:
   saturationMax: 0.8
   shellAlphaMin: 0.1
   shellAlphaMax: 0.8
+  idleAnimator: {fileID: 8061249236314123303}
+  maxSpeed: 0.75
+  minSpeed: 0.1
   wave1: {fileID: 1227867661}
   wave2: {fileID: 741950611}
   amplitudeMin: 0.5
