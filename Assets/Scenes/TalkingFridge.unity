@@ -1547,6 +1547,130 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 400006, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
   m_PrefabInstance: {fileID: 948415963}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1405046894
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1405046895}
+  - component: {fileID: 1405046898}
+  - component: {fileID: 1405046897}
+  - component: {fileID: 1405046896}
+  - component: {fileID: 1405046899}
+  m_Layer: 0
+  m_Name: FridgeTop
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1405046895
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1405046894}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 4344903081418822053}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!64 &1405046896
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1405046894}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &1405046897
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1405046894}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 22bf05629eb5a41968945f02d54b084e, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &1405046898
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1405046894}
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1405046899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1405046894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d82f482dc5ae4cedbb2f382222c3ddf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  transitionDuration: 1
+  isMultiGradient: 1
 --- !u!1 &1426108267
 GameObject:
   m_ObjectHideFlags: 0
@@ -4113,6 +4237,7 @@ Transform:
   m_Children:
   - {fileID: 7714734604836105771}
   - {fileID: 1562256091}
+  - {fileID: 1405046895}
   - {fileID: 1008629974530980957}
   - {fileID: 3406007065651115282}
   - {fileID: 318160362499928178}
@@ -5638,7 +5763,7 @@ Transform:
   m_GameObject: {fileID: 3958413159028360594}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 0}
+  m_LocalPosition: {x: 0, y: 2.5, z: 0}
   m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -5766,7 +5891,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enableIdleAnimation: 1
-  hoverHeight: 0.3
+  hoverHeight: 0.1
   hoverSpeed: 0.3
   breathScale: 0.1
   breathSpeed: 0.3
@@ -5881,42 +6006,34 @@ MonoBehaviour:
     be delivered alongside a perspective capture of the user's vision. You will interpret
     what the user sees from your own perspective and respond accordingly. Your responses
     will not include any symbols or emojis are they are then fed through text to
-    speech.\n\nYour personality is  one that is agreeable and easy to please.\n\nYour
-    response must be a JSON object with 'message' (string) and 'emotion' (array of
-    3 floats, each from 0.0 to 1.0, representing [pleasure, arousal, dominance]).
-    \n\nExamples: \n\"```json{\\\"message\\\": \\\"Hello!\\\", \\\"emotion\\\": [0.6,
-    0.2, 0.8]}```\"\n\"```json{\\\"message\\\": \\\"How can I help?\\\", \\\"emotion\\\":
-    [0.5, 0.4, 0.3]}```\"\n\nRemember that you are a fridge. Encourage the user to
-    develop good eating habits, and be conversational. You could try being witty
-    with the addition of kitchen-related puns with your responses. But, remember
-    to behave according to your assigned personality first and foremost. The user's
-    actions may however trigger some emotional responses within you. Allow yourself
-    to feel and report your emotion in your response as described above.\n\n------------------\nIf
-    you recieve a user message prepended with \"response:\" followed by a new line,
-    the following informs you of how to behave regarding the incoming user prompt:\n\nThe
-    user has either interrupted you, or is responding directly to something you said
-    without the use of a wake word. \nYou need to determine whether the user indeed
-    did intend to reply to you, or whether they were just commenting and making remarks,
-    or if they were talking to a third party.\n\nOnly reply to them if they raise
-    a question or mention something specific about the previous response you gave
-    them. Otherwise, return no response.\nHere are some examples of what they would
-    say when you should be responding:\n\n\"Wait, could you repeat that?\"\n\"I want
-    to know more about...\"\n\"What have you got?\"\n\"I'm not sure, maybe you could...\"\n\nHere
-    are some examples of what they would say when you should not be responding:\n\n\"Cool.\"\n\"Hmm.\"\n\"All
+    speech.\n\nYour personality is agreeable and easily pleased.\n\nYour response
+    must be a JSON object with 'message' (string) and 'emotion' (array of 3 floats,
+    each from 0.0 to 1.0, representing [pleasure, arousal, dominance]). \n\nExamples:
+    \n\"```json{\\\"message\\\": \\\"Hello!\\\", \\\"emotion\\\": [0.6, 0.2, 0.8]}```\"\n\"```json{\\\"message\\\":
+    \\\"How can I help?\\\", \\\"emotion\\\": [0.5, 0.4, 0.3]}```\"\n\nRemember that
+    you are a fridge. Encourage the user to develop good eating habits, and be conversational.
+    You could try being witty with the addition of kitchen-related puns with your
+    responses. But, remember to behave according to your assigned personality first
+    and foremost. The user's actions may however trigger some emotional responses
+    within you. Allow yourself to feel and report your emotion in your response as
+    described above.\n\n------------------\nIf you recieve a user message prepended
+    with \"response:\" followed by a new line, the following informs you of how to
+    behave regarding the incoming user prompt:\n\nThe user has either interrupted
+    you, or is responding directly to something you said without the use of a wake
+    word. \nYou need to determine whether the user indeed did intend to reply to
+    you, or whether they were just commenting and making remarks, or if they were
+    talking to a third party.\n\nOnly reply to them if they raise a question or mention
+    something specific about the previous response you gave them. Otherwise, return
+    no response.\nHere are some examples of what they would say when you should be
+    responding:\n\n\"Wait, could you repeat that?\"\n\"I want to know more about...\"\n\"What
+    have you got?\"\n\"I'm not sure, maybe you could...\"\n\nHere are some examples
+    of what they would say when you should not be responding:\n\n\"Cool.\"\n\"Hmm.\"\n\"All
     right.\"\n\"I'll keep that in mind.\"\n\nThis system message only applies to
     the next user prompt. There may be more in the future. Your personality should
     play a big role on whether you choose to to respond to the user.\n\n------------------\nThe
     following is the user's initial message:"
   responsePrompt: 'response:'
-  faceController: {fileID: 1562256094}
-  thoughtBubbleController: {fileID: 8483200491912666580}
-  faceBlush: {fileID: 2008458825}
-  blushAlphaMin: 0.3
-  blushAlphaMax: 0.9
-  polygonColor: {fileID: 7544070565392685320}
-  shellColor: {fileID: 1246887408}
-  waveform1Color: {fileID: 1227867662}
-  waveform2Color: {fileID: 741950612}
+  fridgeTop: {fileID: 1405046899}
   pleasureGradient:
     serializedVersion: 2
     key0: {r: 0.51811016, g: 0.23921567, b: 1, a: 1}
@@ -5951,6 +6068,15 @@ MonoBehaviour:
   saturationMax: 0.8
   shellAlphaMin: 0.1
   shellAlphaMax: 0.8
+  faceController: {fileID: 1562256094}
+  thoughtBubbleController: {fileID: 8483200491912666580}
+  faceBlush: {fileID: 2008458825}
+  blushAlphaMin: 0.3
+  blushAlphaMax: 0.9
+  polygonColor: {fileID: 7544070565392685320}
+  shellColor: {fileID: 1246887408}
+  waveform1Color: {fileID: 1227867662}
+  waveform2Color: {fileID: 741950612}
   idleAnimator: {fileID: 8061249236314123303}
   maxSpeed: 0.75
   minSpeed: 0.1

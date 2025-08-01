@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 using PassthroughCameraSamples;
 using TMPro;
 using ollama;
-using UnityEngine.Serialization;
+using Unity.VisualScripting;
 using Random = System.Random;
 
 public class OllamaManager : MonoBehaviour
@@ -30,21 +30,9 @@ public class OllamaManager : MonoBehaviour
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
     [SerializeField] private string responsePrompt = "response";
 
-    [Space(10)] 
-    [Header("Face Settings")]
-    [SerializeField] private FaceController faceController;
-    [SerializeField] private ThoughtBubbleController thoughtBubbleController;
-    [SerializeField] private ColorManager faceBlush;
-    [Range(0f, 1f)] [SerializeField] private float blushAlphaMin = 0.3f;
-    [Range(0f, 1f)] [SerializeField] private float blushAlphaMax = 0.9f;
+    [Space(10)] [Header("Color Settings")] 
+    [SerializeField] private ColorManager fridgeTop;
     
-    [Space(10)] 
-    [Header("Blob Color Settings")] 
-    [SerializeField] private ColorManager polygonColor;
-    [SerializeField] private ColorManager shellColor;
-    [SerializeField] private ColorManager waveform1Color;
-    [SerializeField] private ColorManager waveform2Color;
-
     [Header("Pleasure -> Hue Gradient")]
     [Tooltip("Maps Pleasure (0-1) to this color gradient.")]
     [SerializeField] private Gradient pleasureGradient;
@@ -54,20 +42,35 @@ public class OllamaManager : MonoBehaviour
     [Range(0f, 1f)] [SerializeField] private float saturationMin = 0.4f;
     [Range(0f, 1f)] [SerializeField] private float saturationMax = 1.0f;
 
-    [Header("Dominance -> Shell Transparency")]
+    [Header("Dominance -> Transparency")]
     [Tooltip("Maps Dominance (0-1) to the Shell's Alpha.")]
     [Range(0f, 1f)] [SerializeField] private float shellAlphaMin = 0.1f;
     [Range(0f, 1f)] [SerializeField] private float shellAlphaMax = 0.9f;
-
-    [Space(10)] [Header("Blob Idle Animation Settings")] 
+    
+    [Space(10)] 
+    [Header("Face Settings")]
+    [SerializeField] private FaceController faceController;
+    [SerializeField] private ThoughtBubbleController thoughtBubbleController;
+    [SerializeField] private ColorManager faceBlush;
+    [Range(0f, 1f)] [SerializeField] private float blushAlphaMin = 0.3f;
+    [Range(0f, 1f)] [SerializeField] private float blushAlphaMax = 0.9f;
+    
+    [Space(10)] 
+    [Header("Blob Settings")] 
+    [SerializeField] private ColorManager polygonColor;
+    [SerializeField] private ColorManager shellColor;
+    [SerializeField] private ColorManager waveform1Color;
+    [SerializeField] private ColorManager waveform2Color;
+    
+    [Header("Blob Idle Animation Settings")] 
     [SerializeField] private IdleAnimator idleAnimator;
     [Range(0f, 1f)] [SerializeField] private float maxSpeed = 0.75f;
     [Range(0f, 1f)] [SerializeField] private float minSpeed = 0.1f;
     
-    [Space(10)] 
     [Header("Blob Waveform Settings")]
     [SerializeField] private AdaptiveWaveform wave1;
     [SerializeField] private AdaptiveWaveform wave2;
+    
     [Header("Arousal -> Amplitude")]
     [Range(0f, 2f)] [SerializeField] private float amplitudeMin = 0.2f;
     [Range(0f, 2f)] [SerializeField] private float amplitudeMax = 1.5f;
@@ -75,8 +78,7 @@ public class OllamaManager : MonoBehaviour
     [Header("Arousal -> Noise Speed")]
     [Range(0f, 10f)] [SerializeField] private float noiseSpeedMin = 1f;
     [Range(0f, 10f)] [SerializeField] private float noiseSpeedMax = 5f;
-
-    [FormerlySerializedAs("noiseScaleMin_Pleasant")]
+    
     [Header("Pleasure -> Noise Scale (Jaggedness)")]
     [Tooltip("Lower values are smoother, higher values are more jagged.")]
     [Range(0f, 10f)] [SerializeField] private float noiseScaleMinPleasant = 1f;
@@ -85,8 +87,7 @@ public class OllamaManager : MonoBehaviour
     [Header("Dominance -> Rotation Speed")]
     [Range(0f, 1f)] [SerializeField] private float rotationSpeedMin = 0.25f;
     [Range(0f, 1f)] [SerializeField] private float rotationSpeedMax = 1f;
-
-    [Space(10)]
+    
     [Header("Blob Poly Count")]
     [Tooltip("Lower values are more acute, higher values are more smooth.")]
     [SerializeField] private PolygonalSphereGenerator polygonShape;
@@ -165,6 +166,11 @@ public class OllamaManager : MonoBehaviour
         if (face)
         {
             faceObject.SetActive(true);
+        }
+
+        if (color)
+        {
+            fridgeTop.GameObject().SetActive(true);
         }
 
         // Editor debug
@@ -302,7 +308,7 @@ public class OllamaManager : MonoBehaviour
             
             if (color)
             {
-                SetBlush(pleasure, arousal, dominance);
+                faceBlush.SetColor(GetColor(pleasure, arousal, dominance));
             }   
             
             if (thought)
@@ -311,7 +317,6 @@ public class OllamaManager : MonoBehaviour
                 {
                     case "happy":
                         thoughtBubbleController.ShowHappyThought();
-                        Debug.Log("SHOWING HAPPY THOUGHT");
                         break;
                     case "sad":
                         thoughtBubbleController.ShowSadThought();
@@ -325,9 +330,17 @@ public class OllamaManager : MonoBehaviour
                     case "surprised":
                         thoughtBubbleController.ShowSurprisedThought();
                         break;
+                    case "neutral":
+                        thoughtBubbleController.HideThought();
+                        break;
                 }
             }
         }
+        
+        if (color)
+        {
+            fridgeTop.SetColor(GetColor(pleasure, arousal, dominance));
+        }   
 
         if (sound)
         {
@@ -508,7 +521,7 @@ public class OllamaManager : MonoBehaviour
         waveform2Color.SetColor(newWaveformColor);
     }
 
-    private void SetBlush(float p, float a, float d)
+    private Color GetColor(float p, float a, float d)
     {
         // 1. Pleasure -> Hue
         var baseColor = pleasureGradient.Evaluate(p);
@@ -521,8 +534,8 @@ public class OllamaManager : MonoBehaviour
         // 3. Dominance -> Alpha & Contrast
         var alpha = Mathf.Lerp(blushAlphaMin, blushAlphaMax, d);
         var finalColor = new Color(saturatedColor.r, saturatedColor.g, saturatedColor.b, alpha);
-        
-        faceBlush.SetColor(finalColor);
+
+        return finalColor;
     }
     
     
