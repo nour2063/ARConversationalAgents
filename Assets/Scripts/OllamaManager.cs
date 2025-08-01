@@ -22,13 +22,14 @@ public class OllamaManager : MonoBehaviour
     
     [Header("References")] 
     [SerializeField] private WebCamTextureManager webcamManager;
-    [SerializeField] private LocalNetworkTTS speaker;
+    [SerializeField] private CoquiTTSController speaker;
 
     [Header("Vision Model")] 
     [SerializeField] private string serverIP = "http://localhost:11434/";
     [TextArea(30,10)]
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
     [SerializeField] private string responsePrompt = "response";
+    [SerializeField] private string comparePrompt = "compare";
 
     [Space(10)] [Header("Color Settings")] 
     [SerializeField] private ColorManager fridgeTop;
@@ -111,10 +112,12 @@ public class OllamaManager : MonoBehaviour
     [SerializeField] private AudioSource audioOutput;
     [SerializeField] private EmotionalAudioBurstData audioData = new EmotionalAudioBurstData();
     
-    [Header("Debug Image")]
+    [Header("Image Captures")]
     [SerializeField] private Texture2D image;
+    [SerializeField] private Texture2D image2;
     
     private bool _processing;
+    private bool _comparing;
     private readonly List<Message> _chatHistory = new List<Message>();
     
     private class Message
@@ -195,7 +198,11 @@ public class OllamaManager : MonoBehaviour
             userMessage.Content = initialPrompt + "\n \n" + prompt;
         }
         
-        if (speaker.IsListening())
+        if (speaker.IsListening() && _comparing)
+        {
+            userMessage.Content = comparePrompt + "\n \n" + prompt;
+        } 
+        else if (speaker.IsListening())
         {
             userMessage.Content = responsePrompt + "\n \n" + prompt;
         }
@@ -220,10 +227,10 @@ public class OllamaManager : MonoBehaviour
         // Editor debug
         if (image != null)
         {
-            imagesToSend = new Texture2D[] { image };
+            imagesToSend = _comparing ? new [] {image, image2} : new [] { image };
         }
 
-        string response = null;
+        string response;
         try
         {
             resultText.text = "making chat request...";
@@ -245,21 +252,30 @@ public class OllamaManager : MonoBehaviour
         ParseResponse(response);
     }
 
-    public void CaptureImage()
+    public void CaptureImage(int idx = 0)
     {
         try
         {
             resultText.text = "Capturing...";
             var width = webcamManager.WebCamTexture.width;
             var height = webcamManager.WebCamTexture.height;
-
-            image ??= new Texture2D(width, height);
-
+            
             var pixels = new Color32[width * height];
             webcamManager.WebCamTexture.GetPixels32(pixels);
 
-            image.SetPixels32(pixels);
-            image.Apply();
+            if (idx == 0)
+            {
+                image ??= new Texture2D(width, height);
+                image.SetPixels32(pixels);
+                image.Apply();
+            }
+            else
+            {
+                _comparing = true;
+                image2 ??= new Texture2D(width, height);
+                image2.SetPixels32(pixels);
+                image2.Apply();
+            }
         }
         catch
         {
@@ -598,7 +614,7 @@ public class OllamaManager : MonoBehaviour
     
     private void SetLoD(float p)
     {
-        var detailLevel = Mathf.RoundToInt(Mathf.Lerp(maxPoly, minPoly, p));
+        var detailLevel = Mathf.RoundToInt(Mathf.Lerp(minPoly, maxPoly, p));
         polygonShape.detailLevel = detailLevel;
         shellShape.detailLevel = detailLevel;
         StartCoroutine(polygonShape.DoChangeShapeAndAnimate());

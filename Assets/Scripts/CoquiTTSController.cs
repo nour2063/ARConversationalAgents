@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-public class LocalNetworkTTS : MonoBehaviour
+public class CoquiTTSController : MonoBehaviour
 {
     [Header("Configuration")]
     public string serverIPAddress = "localhost";
@@ -21,8 +21,6 @@ public class LocalNetworkTTS : MonoBehaviour
     [SerializeField] private WhisperSTTController whisperSTTController;
     [SerializeField] private float listeningDuration = 10.0f;
     
-    // --- THIS IS THE CRUCIAL ADDITION ---
-    [Tooltip("Drag the GameObject with your WakeWordDetector script onto this slot.")]
     [SerializeField] private WakeWordDetector wakeWordDetector;
 
     private AudioSource _audioSource;
@@ -100,8 +98,12 @@ public class LocalNetworkTTS : MonoBehaviour
     {
         ListeningPeriod();
     }
+
+    public void HandleCollision()
+    {
+        ListeningPeriod();
+    }
     
-    // --- THIS METHOD NOW CONTAINS THE FIX ---
     private void ListeningPeriod()
     {
         Debug.Log("TTS has finished. Preparing for follow-up command...");
@@ -122,12 +124,65 @@ public class LocalNetworkTTS : MonoBehaviour
         _isListening = false;
     }
 
-    // --- The rest of your script (helpers, etc.) is correct and unchanged ---
     public bool IsSpeaking() => _isSpeaking;
     public bool IsListening() => _isListening;
-    private async void DecodeAudioAndCreateClip(byte[] data, Action<AudioClip> callback){ float[] samples = null; int channels = 0; int sampleRate = 0; try { await Task.Run(() => { samples = WavUtility.GetSamplesFromWav(data, out channels, out sampleRate); }); } catch (Exception e) { Debug.LogError($"Error decoding audio samples: {e.Message}"); callback?.Invoke(null); return; } if (samples == null) { callback?.Invoke(null); return; } AudioClip clip = AudioClip.Create("TTS_Clip", samples.Length / channels, channels, sampleRate, false); clip.SetData(samples, 0); callback?.Invoke(clip); }
-    private (string, byte[]) PrepareWebRequest(SpeechRequest request) { var currentApiEndpoint = !string.IsNullOrEmpty(request.EspeakVoiceID) ? espeakApiEndpoint : coquiApiEndpoint; var requestJson = ""; if (!string.IsNullOrEmpty(request.EspeakVoiceID)) requestJson = JsonUtility.ToJson(new EspeakRequestData { Text = request.Text, VoiceID = request.EspeakVoiceID }); else requestJson = JsonUtility.ToJson(new TextToSpeakData { Text = request.Text, Speaker = request.CoquiSpeakerID }); var url = $"http://{serverIPAddress}:{serverPort}{currentApiEndpoint}"; return (url, System.Text.Encoding.UTF8.GetBytes(requestJson)); }
-    private class TextToSpeakData { public string Text; public string Speaker; }
-    private class EspeakRequestData { public string Text; public string VoiceID; }
-    private class SpeechRequest { public readonly string Text; public readonly string CoquiSpeakerID; public readonly string EspeakVoiceID; public SpeechRequest(string text, string coqui, string espeak) { Text = text; CoquiSpeakerID = coqui; EspeakVoiceID = espeak; } }
+
+    private async void DecodeAudioAndCreateClip(byte[] data, Action<AudioClip> callback)
+    {
+        float[] samples = null; int channels = 0; int sampleRate = 0;
+        try
+        {
+            await Task.Run(() => { samples = WavUtility.GetSamplesFromWav(data, out channels, out sampleRate); });
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error decoding audio samples: {e.Message}"); callback?.Invoke(null); return;
+        }
+
+        if (samples == null)
+        {
+            callback?.Invoke(null); return;
+        } 
+        AudioClip clip = AudioClip.Create("TTS_Clip", samples.Length / channels, channels, sampleRate, false); 
+        clip.SetData(samples, 0); callback?.Invoke(clip);
+    }
+
+    private (string, byte[]) PrepareWebRequest(SpeechRequest request)
+    {
+        var currentApiEndpoint = !string.IsNullOrEmpty(request.EspeakVoiceID) ? espeakApiEndpoint : coquiApiEndpoint; 
+        var requestJson = ""; 
+        if (!string.IsNullOrEmpty(request.EspeakVoiceID)) requestJson = JsonUtility.ToJson(new EspeakRequestData
+        {
+            Text = request.Text, VoiceID = request.EspeakVoiceID
+        }); 
+        else requestJson = JsonUtility.ToJson(new TextToSpeakData
+        {
+            Text = request.Text, Speaker = request.CoquiSpeakerID 
+            
+        }); 
+        var url = $"http://{serverIPAddress}:{serverPort}{currentApiEndpoint}"; 
+        return (url, System.Text.Encoding.UTF8.GetBytes(requestJson));
+    }
+
+    private class TextToSpeakData
+    {
+        public string Text; public string Speaker;
+    }
+
+    private class EspeakRequestData
+    {
+        public string Text; public string VoiceID;
+    }
+
+    private class SpeechRequest
+    {
+        public readonly string Text; 
+        public readonly string CoquiSpeakerID; 
+        public readonly string EspeakVoiceID;
+
+        public SpeechRequest(string text, string coqui, string espeak)
+        {
+            Text = text; CoquiSpeakerID = coqui; EspeakVoiceID = espeak;
+        }
+    }
 }

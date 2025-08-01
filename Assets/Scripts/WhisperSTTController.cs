@@ -8,7 +8,7 @@ public class WhisperSTTController : MonoBehaviour
 {
     [Tooltip("Assign the WhisperManager component from your 'com.whisper.unity' package here.")]
     public WhisperManager whisperManager;
-    [SerializeField] private LocalNetworkTTS speaker;
+    [SerializeField] private CoquiTTSController speaker;
 
     // C# Events for code subscribers
     public event Action<string> OnCommandTranscribed;

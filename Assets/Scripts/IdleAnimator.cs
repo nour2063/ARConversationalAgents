@@ -30,7 +30,7 @@ public class IdleAnimator : MonoBehaviour
     public float talkingRandomnessFrequency = 0.5f; // How often the random speed is re-evaluated
 
     [SerializeField] private bool isSpeaking = false;
-    [SerializeField] private LocalNetworkTTS speaker;
+    [SerializeField] private CoquiTTSController speaker;
     
     private Vector3 initialPosition;
     private Vector3 initialScale;

@@ -13,7 +13,7 @@ public class AdaptiveWaveform : MonoBehaviour
     [Header("Animation States")]
     [Tooltip("Check this box to activate the 'speaking' animation.")]
     public bool isSpeaking = false;
-    [SerializeField] private LocalNetworkTTS speaker;
+    [SerializeField] private CoquiTTSController speaker;
     [Tooltip("Check this box to activate the 'listening' animation.")]
     public bool isListening = false;
     [SerializeField] private WhisperSTTController listener;
