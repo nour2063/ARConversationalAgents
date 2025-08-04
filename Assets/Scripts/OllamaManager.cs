@@ -11,6 +11,9 @@ using Random = System.Random;
 
 public class OllamaManager : MonoBehaviour
 {
+    [Header("Fridge Entity")]
+    [SerializeField] private GameObject fridgeEntity;
+    
     [Header("Feedback Settings")] 
     [SerializeField] private GameObject blobObject;
     [SerializeField] private GameObject faceObject;
@@ -98,6 +101,7 @@ public class OllamaManager : MonoBehaviour
     
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI resultText;
+    [SerializeField] private SettingsManager settings;
     
     [Serializable]
     public class EmotionalAudioBurstData
@@ -161,21 +165,6 @@ public class OllamaManager : MonoBehaviour
             Debug.LogError("ResultText UI not set in PassthroughCameraLocal");
         }
 
-        if (blob)
-        {
-            blobObject.SetActive(true);
-        }
-
-        if (face)
-        {
-            faceObject.SetActive(true);
-        }
-
-        if (color)
-        {
-            fridgeTop.GameObject().SetActive(true);
-        }
-
         // Editor debug
         if (image != null)
         {
@@ -183,6 +172,27 @@ public class OllamaManager : MonoBehaviour
             // SubmitImage("What have you got for me? Give me a full rundown!");
             // SubmitImage("What should I make for dinner?");
         }
+        
+        Setup();
+    }
+
+    private void Setup()
+    {
+        blob = settings.activeSettings.blob;
+        face = settings.activeSettings.face;
+        color = settings.activeSettings.color;
+        thought = settings.activeSettings.thought;
+        sound = settings.activeSettings.sound;
+        
+        Debug.Log("Blob is set to " + blob);
+        Debug.Log("Color is set to " + color);
+        Debug.Log("Thought is set to " + thought);
+        Debug.Log("Sound is set to " + sound);
+        Debug.Log("Face is set to " + face);
+        
+        blobObject.SetActive(blob);
+        faceObject.SetActive(face);
+        fridgeTop.gameObject.SetActive(color);
     }
 
     public async void SubmitImage(string prompt)
@@ -195,7 +205,7 @@ public class OllamaManager : MonoBehaviour
         
         if (_chatHistory.Count == 0)
         {
-            userMessage.Content = initialPrompt + "\n \n" + prompt;
+            userMessage.Content = initialPrompt + settings.activeSettings.agentPersonality + "\n------------------\nThe following is the user's initial message:" + "\n \n" + prompt;
         }
         
         if (speaker.IsListening() && _comparing)
@@ -386,12 +396,6 @@ public class OllamaManager : MonoBehaviour
         speaker.Speak(message);
         _processing = false;
     }
-    
-    public void ClearChatHistory()
-    {
-        _chatHistory.Clear();
-    }
-    
 
     // --- Mapping Pleasure-Arousal Space to 6 Discrete Emotions ---
 
@@ -640,4 +644,31 @@ public class OllamaManager : MonoBehaviour
         idleAnimator.breathSpeed = speed;
     }
 
+    public void Reset()
+    {
+        if (fridgeEntity == null)
+        {
+            Debug.LogError("FridgeEntity Root has not been assigned in the OllamaManager Inspector! Cannot reset.");
+            return;
+        }
+    
+        // Remember the context
+        var parent = fridgeEntity.transform.parent;
+        var localPosition = fridgeEntity.transform.localPosition;
+        var localRotation = fridgeEntity.transform.localRotation;
+        var localScale = fridgeEntity.transform.localScale;
+
+        // --- STEP 1: Instantiate a new clone ---
+        var newFridge = Instantiate(fridgeEntity, parent);
+
+        // Apply the saved local transform properties
+        newFridge.transform.localPosition = localPosition;
+        newFridge.transform.localRotation = localRotation;
+        newFridge.transform.localScale = localScale;
+
+        // --- STEP 2: NOW, destroy the original object ---
+        Destroy(fridgeEntity);
+
+        Debug.Log("FridgeEntity has been cloned and the original destroyed.");
+    }
 }
