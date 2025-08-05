@@ -34,22 +34,31 @@ public class WakeWordDetector : MonoBehaviour
     
     private void InitializePorcupine()
     {
+        Debug.Log($"[WakeWordDetector] Checking Mic Permission. Has Permission: {Application.HasUserAuthorization(UserAuthorization.Microphone)}");
+
         if (!Application.HasUserAuthorization(UserAuthorization.Microphone))
         {
+            Debug.Log("[WakeWordDetector] Microphone permission not granted. Requesting...");
             Application.RequestUserAuthorization(UserAuthorization.Microphone);
-            Invoke(nameof(InitializePorcupine), 1f);
+            Invoke(nameof(InitializePorcupine), 1f); // This gives a 1s delay for the user to respond
             return;
         }
 
         try
         {
+            Debug.Log("[WakeWordDetector] Permission granted. Attempting to create PorcupineManager...");
             _porcupineManager = PorcupineManager.FromKeywordPaths(
                 _picovoiceAccessKey,
                 new List<string> { Path.Combine(Application.streamingAssetsPath, _wakeWordModelFilename) },
                 WakeWordCallback);
+            Debug.Log("[WakeWordDetector] PorcupineManager created successfully!");
             StartWakeWordListening();
         }
-        catch (Exception e) { Debug.LogError($"Failed to create Porcupine manager: {e.Message}"); }
+        catch (Exception e) 
+        {
+            // This will give you more detail in the log
+            Debug.LogError($"[WakeWordDetector] Failed to create Porcupine manager: {e.ToString()}"); 
+        }
     }
     
     private void WakeWordCallback(int keywordIndex)

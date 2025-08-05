@@ -23,13 +23,16 @@ public struct SettingsData
             blob = false,
             face = false,
             thought = false,
-            agentPersonality = "Agreeable"
+            agentPersonality = "Happy"
         };
     }
 }
 
 public class SettingsManager : MonoBehaviour
 {
+    [Header("References")]
+    [SerializeField] private FeedbackManager fridge;
+    
     // --- Singleton Instance ---
     private static SettingsManager Instance { get; set; }
 
@@ -42,8 +45,6 @@ public class SettingsManager : MonoBehaviour
     public Toggle faceToggle;
     public Toggle thoughtToggle;
     public ToggleGroup personalityToggleGroup;
-
-    public OllamaManager fridge;
 
     // --- State Management ---
     public SettingsData activeSettings;  // The settings currently used by the application.
@@ -94,7 +95,7 @@ public class SettingsManager : MonoBehaviour
 
     private void FindNewFridge()
     {
-        fridge = FindAnyObjectByType<OllamaManager>();
+        fridge = FindAnyObjectByType<FeedbackManager>();
     }
 
     // --- Methods for individual On/Off Toggles ---
