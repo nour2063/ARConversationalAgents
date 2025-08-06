@@ -100,11 +100,11 @@ public class SettingsManager : MonoBehaviour
 
     // --- Methods for individual On/Off Toggles ---
     // These methods modify the 'pendingSettings' only.
-    public void SetColor(bool isEnabled) { _pendingSettings.color = isEnabled; }
-    public void SetSound(bool isEnabled) { _pendingSettings.sound = isEnabled; }
-    public void SetBlob(bool isEnabled) { _pendingSettings.blob = isEnabled; }
-    public void SetFace(bool isEnabled) { _pendingSettings.face = isEnabled; }
-    public void SetThought(bool isEnabled) { _pendingSettings.thought = isEnabled; }
+    public void SetColor(bool isEnabled) => _pendingSettings.color = isEnabled; 
+    public void SetSound(bool isEnabled) => _pendingSettings.sound = isEnabled;
+    public void SetBlob(bool isEnabled) => _pendingSettings.blob = isEnabled;
+    public void SetFace(bool isEnabled) => _pendingSettings.face = isEnabled;
+    public void SetThought(bool isEnabled) => _pendingSettings.thought = isEnabled;
     
     private void UpdateUIForms()
     {
@@ -121,7 +121,7 @@ public class SettingsManager : MonoBehaviour
             // If this toggle's name matches our saved setting, make it active.
             if (toggle.gameObject.name != _pendingSettings.agentPersonality) continue;
             toggle.isOn = true;
-            break; // Exit the loop once we've found and set the correct one.
+            break; 
         }
     }
     

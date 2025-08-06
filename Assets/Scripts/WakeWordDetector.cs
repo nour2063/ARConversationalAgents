@@ -9,26 +9,33 @@ using UnityEngine.Events;
 public class WakeWordDetector : MonoBehaviour
 {
     [Header("Configuration")]
-    [SerializeField] private string _picovoiceAccessKey;
-    [SerializeField] private string _wakeWordModelFilename;
-    [SerializeField] private WhisperSTTController _sttController;
-    [SerializeField] private float _commandListenDuration = 10.0f;
+    [SerializeField] private string picovoiceAccessKey;
+    [SerializeField] private string wakeWordModelFilename;
+    [SerializeField] private WhisperSTTController sttController;
+    [SerializeField] private float commandListenDuration = 10.0f;
 
     [Header("Event Callbacks")]
-    public UnityEvent OnWakeWordDetectedEvent;
+    [SerializeField] private UnityEvent onWakeWordDetectedEvent;
 
     private PorcupineManager _porcupineManager;
-    private bool _isListeningForWakeWord = false; // Using your correct flag
+    private bool _isListeningForWakeWord;
+    private IEnumerator _listeningCoroutine;
 
-    void Awake()
+    private void Awake()
     {
-        if (string.IsNullOrEmpty(_picovoiceAccessKey) || _picovoiceAccessKey.Length < 10) { Debug.LogError("Picovoice AccessKey is not set!"); enabled = false; return; }
-        if (_sttController == null) { Debug.LogError("WhisperSTTController is not assigned in the Inspector!", this); enabled = false; return; }
+        if (string.IsNullOrEmpty(picovoiceAccessKey) || picovoiceAccessKey.Length < 10)
+        {
+            Debug.LogError("Picovoice AccessKey is not set!"); enabled = false; return;
+        }
+
+        if (sttController != null) return;
+        Debug.LogError("WhisperSTTController is not assigned in the Inspector!", this); enabled = false; return;
     }
 
-    void Start()
+    private void Start()
     {
-        _sttController.OnCommandListenTimeout += RestartWakeWordListening;
+        _listeningCoroutine = TransitionToCommandListening();
+        sttController.OnCommandListenTimeout += RestartWakeWordListening;
         InitializePorcupine();
     }
     
@@ -40,7 +47,7 @@ public class WakeWordDetector : MonoBehaviour
         {
             Debug.Log("[WakeWordDetector] Microphone permission not granted. Requesting...");
             Application.RequestUserAuthorization(UserAuthorization.Microphone);
-            Invoke(nameof(InitializePorcupine), 1f); // This gives a 1s delay for the user to respond
+            Invoke(nameof(InitializePorcupine), 1f); // This gives a 1s delay for the user to respond with mic permissions
             return;
         }
 
@@ -48,26 +55,23 @@ public class WakeWordDetector : MonoBehaviour
         {
             Debug.Log("[WakeWordDetector] Permission granted. Attempting to create PorcupineManager...");
             _porcupineManager = PorcupineManager.FromKeywordPaths(
-                _picovoiceAccessKey,
-                new List<string> { Path.Combine(Application.streamingAssetsPath, _wakeWordModelFilename) },
+                picovoiceAccessKey,
+                new List<string> { Path.Combine(Application.streamingAssetsPath, wakeWordModelFilename) },
                 WakeWordCallback);
             Debug.Log("[WakeWordDetector] PorcupineManager created successfully!");
             StartWakeWordListening();
         }
         catch (Exception e) 
         {
-            // This will give you more detail in the log
-            Debug.LogError($"[WakeWordDetector] Failed to create Porcupine manager: {e.ToString()}"); 
+            Debug.LogError($"[WakeWordDetector] Failed to create Porcupine manager: {e}"); 
         }
     }
     
     private void WakeWordCallback(int keywordIndex)
     {
-        if (keywordIndex == 0)
-        {
-            OnWakeWordDetectedEvent?.Invoke();
-            StartCoroutine(TransitionToCommandListening());
-        }
+        if (keywordIndex != 0) return;
+        onWakeWordDetectedEvent?.Invoke();
+        StartCoroutine(_listeningCoroutine);
     }
 
     private IEnumerator TransitionToCommandListening()
@@ -79,7 +83,7 @@ public class WakeWordDetector : MonoBehaviour
         yield return null; 
         
         Debug.Log("Transitioning to Whisper STT...");
-        _sttController.StartListeningForCommand(_commandListenDuration);
+        sttController.StartListeningForCommand(commandListenDuration);
     }
 
     private void RestartWakeWordListening()
@@ -88,35 +92,39 @@ public class WakeWordDetector : MonoBehaviour
         StartWakeWordListening();
     }
 
-    public void StartWakeWordListening()
+    private void StartWakeWordListening()
     {
-        // CORRECTED: Uses your boolean flag
         if (_porcupineManager == null || _isListeningForWakeWord) return;
         try
         {
             _porcupineManager.Start();
-            _isListeningForWakeWord = true; // CORRECTED: Sets your flag
+            _isListeningForWakeWord = true;
             Debug.Log(">>> Porcupine started listening for wake word. <<<");
         }
-        catch (Exception e) { Debug.LogError($"Failed to start Porcupine: {e.Message}"); }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to start Porcupine: {e.Message}");
+        }
     }
 
     public void StopWakeWordListening()
     {
-        // CORRECTED: Uses your boolean flag
         if (_porcupineManager == null || !_isListeningForWakeWord) return;
         try
         {
             _porcupineManager.Stop();
-            _isListeningForWakeWord = false; // CORRECTED: Sets your flag
+            _isListeningForWakeWord = false;
             Debug.Log("Porcupine stopped listening.");
         }
-        catch (Exception e) { Debug.LogError($"Failed to stop Porcupine: {e.Message}"); }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to stop Porcupine: {e.Message}");
+        }
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
-        if (_sttController != null) _sttController.OnCommandListenTimeout -= RestartWakeWordListening;
-        if (_porcupineManager != null) _porcupineManager.Delete();
+        if (sttController != null) sttController.OnCommandListenTimeout -= RestartWakeWordListening;
+        _porcupineManager?.Delete();
     }
 }

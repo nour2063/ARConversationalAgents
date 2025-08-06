@@ -1,20 +1,18 @@
 using UnityEngine;
 using System.Collections;
-using NUnit.Framework.Constraints;
 
 public class ColorManager : MonoBehaviour
 {
+    public float transitionDuration = 1.0f;
+    [SerializeField] private bool isMultiGradient;
+    
     private static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
     private static readonly int RadialColor = Shader.PropertyToID("_Color0");
     
-    public float transitionDuration = 1.0f;
-
     private Renderer _objectRenderer;
     private Coroutine _runningCoroutine;
-    
-    [SerializeField] private bool isMultiGradient;
 
-    void Awake()
+    private void Awake()
     {
         _objectRenderer = GetComponent<Renderer>();
         if (_objectRenderer == null)
@@ -44,7 +42,7 @@ public class ColorManager : MonoBehaviour
     private IEnumerator AnimateColorProperty(int propertyID, Color targetColor)
     {
         float elapsedTime = 0;
-        Color startingColor = _objectRenderer.material.GetColor(propertyID);
+        var startingColor = _objectRenderer.material.GetColor(propertyID);
 
         while (elapsedTime < transitionDuration)
         {

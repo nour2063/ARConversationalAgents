@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 public class CoquiTTSController : MonoBehaviour
 {
     [Header("Configuration")]
-    public string serverIPAddress = "localhost";
-    public int serverPort = 5000;
-    public string coquiApiEndpoint = "/synthesize_speech";
-    public string espeakApiEndpoint = "/synthesize_espeak";
+    [SerializeField] private string serverIPAddress = "localhost";
+    [SerializeField] private int serverPort = 5000;
+    [SerializeField] private string coquiApiEndpoint = "/synthesize_speech";
+    [SerializeField] private string espeakApiEndpoint = "/synthesize_espeak";
 
     [Header("Voice Selection")]
-    public string coquiSpeakerID = "";
-    public string espeakVoiceID = "";
+    [SerializeField] private string coquiSpeakerID = "";
+    [SerializeField] private string espeakVoiceID = "";
 
     [Header("State Management")]
     [SerializeField] private WhisperSTTController whisperSTTController;
@@ -24,24 +24,28 @@ public class CoquiTTSController : MonoBehaviour
     [SerializeField] private WakeWordDetector wakeWordDetector;
 
     private AudioSource _audioSource;
-    private bool _isSpeaking = false;
-    private bool _isListening = false;
-    private readonly Queue<SpeechRequest> _speechQueue = new Queue<SpeechRequest>();
+    private bool _isSpeaking;
+    private bool _isListening;
+    private readonly Queue<SpeechRequest> _speechQueue = new ();
 
-    void Awake()
+    private void Awake()
     {
         _audioSource = GetComponent<AudioSource>();
         if (_audioSource == null) _audioSource = gameObject.AddComponent<AudioSource>();
-        if (whisperSTTController == null) { Debug.LogError("WhisperSTTController is not assigned!", this); enabled = false; }
-        if (wakeWordDetector == null) { Debug.LogError("WakeWordDetector is not assigned!", this); enabled = false; }
+        if (whisperSTTController == null)
+        {
+            Debug.LogError("WhisperSTTController is not assigned!", this); enabled = false;
+        }
+        if (wakeWordDetector != null) return;
+        Debug.LogError("WakeWordDetector is not assigned!", this); enabled = false;
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         whisperSTTController.OnCommandListenTimeout += HandleListenEnd;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         whisperSTTController.OnCommandListenTimeout -= HandleListenEnd;
     }
@@ -61,41 +65,44 @@ public class CoquiTTSController : MonoBehaviour
         _isSpeaking = true;
         while (_speechQueue.Count > 0)
         {
-            SpeechRequest currentRequest = _speechQueue.Dequeue();
+            var currentRequest = _speechQueue.Dequeue();
             var (url, bodyRaw) = PrepareWebRequest(currentRequest);
-            using (var www = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST))
+            
+            using var www = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST);
+            
+            www.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            www.downloadHandler = new DownloadHandlerBuffer();
+            www.SetRequestHeader("Content-Type", "application/json");
+            
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
             {
-                www.uploadHandler = new UploadHandlerRaw(bodyRaw);
-                www.downloadHandler = new DownloadHandlerBuffer();
-                www.SetRequestHeader("Content-Type", "application/json");
-                yield return www.SendWebRequest();
-
-                if (www.result != UnityWebRequest.Result.Success) { Debug.LogError($"TTS Request failed: {www.error}"); continue; }
-
-                AudioClip clip = null;
-                bool isDecodingFinished = false;
-                DecodeAudioAndCreateClip(www.downloadHandler.data, decodedClip =>
-                {
-                    clip = decodedClip;
-                    isDecodingFinished = true;
-                });
-                yield return new WaitUntil(() => isDecodingFinished);
-
-                if (clip != null)
-                {
-                    _audioSource.clip = clip;
-                    _audioSource.Play();
-                    yield return new WaitUntil(() => !_audioSource.isPlaying);
-                    Destroy(clip);
-                }
+                Debug.LogError($"TTS Request failed: {www.error}"); continue;
             }
-        }
-        _isSpeaking = false;
-        HandleSpeechCompletion();
-    }
 
-    private void HandleSpeechCompletion()
-    {
+            AudioClip clip = null;
+            var isDecodingFinished = false;
+            DecodeAudioAndCreateClip(www.downloadHandler.data, decodedClip =>
+            {
+                clip = decodedClip;
+                isDecodingFinished = true;
+            });
+            
+            yield return new WaitUntil(() => isDecodingFinished);
+
+            if (!clip) continue;
+            
+            _audioSource.clip = clip;
+            _audioSource.Play();
+            
+            yield return new WaitUntil(() => !_audioSource.isPlaying);
+            
+            Destroy(clip);
+        }
+        
+        _isSpeaking = false;
+        
         ListeningPeriod();
     }
 
@@ -127,9 +134,10 @@ public class CoquiTTSController : MonoBehaviour
     public bool IsSpeaking() => _isSpeaking;
     public bool IsListening() => _isListening;
 
-    private async void DecodeAudioAndCreateClip(byte[] data, Action<AudioClip> callback)
+    private static async void DecodeAudioAndCreateClip(byte[] data, Action<AudioClip> callback)
     {
-        float[] samples = null; int channels = 0; int sampleRate = 0;
+        float[] samples = null; var channels = 0; var sampleRate = 0;
+        
         try
         {
             await Task.Run(() => { samples = WavUtility.GetSamplesFromWav(data, out channels, out sampleRate); });
@@ -143,35 +151,43 @@ public class CoquiTTSController : MonoBehaviour
         {
             callback?.Invoke(null); return;
         } 
-        AudioClip clip = AudioClip.Create("TTS_Clip", samples.Length / channels, channels, sampleRate, false); 
+        
+        var clip = AudioClip.Create("TTS_Clip", samples.Length / channels, channels, sampleRate, false); 
         clip.SetData(samples, 0); callback?.Invoke(clip);
     }
 
     private (string, byte[]) PrepareWebRequest(SpeechRequest request)
     {
         var currentApiEndpoint = !string.IsNullOrEmpty(request.EspeakVoiceID) ? espeakApiEndpoint : coquiApiEndpoint; 
-        var requestJson = ""; 
-        if (!string.IsNullOrEmpty(request.EspeakVoiceID)) requestJson = JsonUtility.ToJson(new EspeakRequestData
+        string requestJson;
+
+        if (!string.IsNullOrEmpty(request.EspeakVoiceID))
         {
-            Text = request.Text, VoiceID = request.EspeakVoiceID
-        }); 
-        else requestJson = JsonUtility.ToJson(new TextToSpeakData
-        {
+            requestJson = JsonUtility.ToJson(new EspeakRequestData {
+                Text = request.Text, VoiceID = request.EspeakVoiceID
+            }); 
+        } 
+        else 
+        {    
+            requestJson = JsonUtility.ToJson(new TextToSpeakData {
             Text = request.Text, Speaker = request.CoquiSpeakerID 
-            
-        }); 
+            }); 
+        }
+        
         var url = $"http://{serverIPAddress}:{serverPort}{currentApiEndpoint}"; 
         return (url, System.Text.Encoding.UTF8.GetBytes(requestJson));
     }
 
     private class TextToSpeakData
     {
-        public string Text; public string Speaker;
+        public string Text; 
+        public string Speaker;
     }
 
     private class EspeakRequestData
     {
-        public string Text; public string VoiceID;
+        public string Text; 
+        public string VoiceID;
     }
 
     private class SpeechRequest
@@ -182,7 +198,8 @@ public class CoquiTTSController : MonoBehaviour
 
         public SpeechRequest(string text, string coqui, string espeak)
         {
-            Text = text; CoquiSpeakerID = coqui; EspeakVoiceID = espeak;
+            Text = text; CoquiSpeakerID = coqui; 
+            EspeakVoiceID = espeak;
         }
     }
 }

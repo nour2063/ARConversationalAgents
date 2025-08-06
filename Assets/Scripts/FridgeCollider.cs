@@ -11,8 +11,5 @@ public class FridgeCollider : MonoBehaviour
         ttsController.HandleCollision();
     }
     
-    private void OnTriggerExit(Collider other)
-    {
-        llm.CaptureImage(1);
-    }
+    private void OnTriggerExit(Collider other) => llm.CaptureImage(1);
 }

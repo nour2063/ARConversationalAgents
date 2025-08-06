@@ -481,21 +481,17 @@ public class FeedbackManager : MonoBehaviour
             return;
         }
     
-        // Remember the context
         var parent = fridgeEntity.transform.parent;
         var localPosition = fridgeEntity.transform.localPosition;
         var localRotation = fridgeEntity.transform.localRotation;
         var localScale = fridgeEntity.transform.localScale;
 
-        // --- STEP 1: Instantiate a new clone ---
         var newFridge = Instantiate(fridgeEntity, parent);
 
-        // Apply the saved local transform properties
         newFridge.transform.localPosition = localPosition;
         newFridge.transform.localRotation = localRotation;
         newFridge.transform.localScale = localScale;
 
-        // --- STEP 2: NOW, destroy the original object ---
         Destroy(fridgeEntity);
         llm.ClearChatHistory();
 

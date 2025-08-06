@@ -1,13 +1,15 @@
 using UnityEngine;
 using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using Whisper;
 
 public class WhisperSTTController : MonoBehaviour
 {
-    [Tooltip("Assign the WhisperManager component from your 'com.whisper.unity' package here.")]
-    public WhisperManager whisperManager;
+    [Header("References")]
+    [SerializeField] private WhisperManager whisperManager;
     [SerializeField] private CoquiTTSController speaker;
 
     // C# Events for code subscribers
@@ -16,31 +18,28 @@ public class WhisperSTTController : MonoBehaviour
 
     // UnityEvents for Inspector binding
     [Header("Event Callbacks")]
-    [Tooltip("Fires when the system starts actively listening for a command.")]
-    public UnityEvent OnListeningStartEvent;
-    [Tooltip("Fires when transcription is successful. Passes the transcribed string as an argument.")]
-    public UnityEvent<string> OnTranscriptionSuccessEvent;
-    [Tooltip("Fires when transcription fails (e.g., no speech, error).")]
-    public UnityEvent OnTranscriptionFailedEvent;
+    [SerializeField] private UnityEvent onListeningStartEvent;
+    [SerializeField] private UnityEvent<string> onTranscriptionSuccessEvent;
+    [SerializeField] private UnityEvent onTranscriptionFailedEvent;
 
+    [FormerlySerializedAs("SampleRate")]
     [Header("Microphone Settings")]
-    public int SampleRate = 16000;
-    public int MaxRecordingLengthSeconds = 10;
+    [SerializeField] private int sampleRate = 16000;
+    [SerializeField] private int maxRecordingLengthSeconds = 10;
 
     [Header("Voice Activity Detection (VAD)")]
-    public bool useVoiceActivityDetection = true;
-    [Range(0.0f, 0.1f)]
-    public float silenceThreshold = 0.01f;
-    public float requiredSilenceDuration = 1.5f;
-    private const float VAD_CHECK_INTERVAL = 0.1f;
-
-
+    [SerializeField] private bool useVoiceActivityDetection = true;
+    [Range(0.0f, 0.1f)] [SerializeField] private float silenceThreshold = 0.01f;
+    [Range(0.0f, 3f)] [SerializeField] private float requiredSilenceDuration = 1.5f;
+    
+    private const float VadCheckInterval = 0.1f;
+    
     private AudioClip _recordingClip;
     private string _microphoneDevice;
     private bool _isRecordingCommand = false;
     private Coroutine _voiceActivityCoroutine;
 
-    void Awake()
+    private void Awake()
     {
         if (Microphone.devices.Length > 0)
         {
@@ -63,14 +62,14 @@ public class WhisperSTTController : MonoBehaviour
 
         Debug.Log($"WhisperSTTController: Starting to record command...");
         _isRecordingCommand = true;
-        OnListeningStartEvent?.Invoke();
+        onListeningStartEvent?.Invoke();
 
         if (Microphone.IsRecording(_microphoneDevice))
         {
             Microphone.End(_microphoneDevice);
         }
         
-        _recordingClip = Microphone.Start(_microphoneDevice, true, MaxRecordingLengthSeconds, SampleRate);
+        _recordingClip = Microphone.Start(_microphoneDevice, true, maxRecordingLengthSeconds, sampleRate);
 
         if (useVoiceActivityDetection)
         {
@@ -94,23 +93,23 @@ public class WhisperSTTController : MonoBehaviour
         }
 
         Debug.Log("WhisperSTTController: Stopping command recording.");
-        int micPosition = Microphone.GetPosition(_microphoneDevice);
+        var micPosition = Microphone.GetPosition(_microphoneDevice);
         Microphone.End(_microphoneDevice);
 
         if (_recordingClip == null || micPosition <= 0)
         {
             Debug.LogWarning("WhisperSTTController: Recorded audio clip is empty. Not transcribing.");
-            OnTranscriptionFailedEvent?.Invoke();
+            onTranscriptionFailedEvent?.Invoke();
             // This path should also signal the timeout to prevent a stuck state
             OnCommandListenTimeout?.Invoke(); 
             return;
         }
         
-        float[] samples = new float[_recordingClip.samples * _recordingClip.channels];
+        var samples = new float[_recordingClip.samples * _recordingClip.channels];
         _recordingClip.GetData(samples, 0);
-        float[] trimmedSamples = new float[micPosition * _recordingClip.channels];
+        var trimmedSamples = new float[micPosition * _recordingClip.channels];
         Array.Copy(samples, trimmedSamples, trimmedSamples.Length);
-        AudioClip trimmedClip = AudioClip.Create("TrimmedRecording", micPosition, _recordingClip.channels, _recordingClip.frequency, false);
+        var trimmedClip = AudioClip.Create("TrimmedRecording", micPosition, _recordingClip.channels, _recordingClip.frequency, false);
         trimmedClip.SetData(trimmedSamples, 0);
 
         try
@@ -118,37 +117,33 @@ public class WhisperSTTController : MonoBehaviour
             Debug.Log("WhisperSTTController: Passing audio to WhisperManager for transcription.");
             var result = await whisperManager.GetTextAsync(trimmedClip);
 
-            // --- EXCLUSIVE CHANGE IS HERE ---
             if (result != null && !string.IsNullOrEmpty(result.Result))
             {
-                // Remove the noise token and any surrounding whitespace
-                string cleanedText = result.Result.Replace("[BLANK_AUDIO]", "").Trim();
+                var cleanedText = result.Result.Replace("[BLANK_AUDIO]", "").Trim();
 
-                // Check if any actual text remains after cleaning
                 if (!string.IsNullOrEmpty(cleanedText))
                 {
                     Debug.Log($"Whisper Transcribed (Cleaned): \"{cleanedText}\"");
                     OnCommandTranscribed?.Invoke(cleanedText);
-                    OnTranscriptionSuccessEvent?.Invoke(cleanedText);
+                    onTranscriptionSuccessEvent?.Invoke(cleanedText);
                 }
                 else
                 {
-                    // This handles cases where the original text was only "[BLANK_AUDIO]"
                     Debug.LogWarning($"Transcription result contained only non-speech tokens. Raw: \"{result.Result}\"");
-                    OnTranscriptionFailedEvent?.Invoke();
+                    onTranscriptionFailedEvent?.Invoke();
                 }
             }
             else
             {
                 var rawResult = (result == null || string.IsNullOrEmpty(result.Result)) ? "NULL_OR_EMPTY" : result.Result;
                 Debug.LogWarning($"WhisperSTTController: Transcription failed. Raw result from Whisper: \"{rawResult}\"");
-                OnTranscriptionFailedEvent?.Invoke();
+                onTranscriptionFailedEvent?.Invoke();
             }
         }
         catch (Exception e)
         {
             Debug.LogError($"WhisperSTTController: Transcription failed: {e.Message}");
-            OnTranscriptionFailedEvent?.Invoke();
+            onTranscriptionFailedEvent?.Invoke();
         }
         finally
         {
@@ -160,27 +155,23 @@ public class WhisperSTTController : MonoBehaviour
     private IEnumerator MonitorVoiceActivity()
     {
         float silentTime = 0;
-        int lastSamplePosition = 0;
-        float[] sampleChunk = new float[Mathf.CeilToInt(SampleRate * VAD_CHECK_INTERVAL)];
+        var lastSamplePosition = 0;
+        var sampleChunk = new float[Mathf.CeilToInt(sampleRate * VadCheckInterval)];
 
         yield return new WaitForSeconds(0.5f); 
 
         while (_isRecordingCommand)
         {
-            int currentSamplePosition = Microphone.GetPosition(_microphoneDevice);
+            var currentSamplePosition = Microphone.GetPosition(_microphoneDevice);
             
             _recordingClip.GetData(sampleChunk, lastSamplePosition);
             
-            float sum = 0;
-            for (int i = 0; i < sampleChunk.Length; i++)
-            {
-                sum += Mathf.Abs(sampleChunk[i]); 
-            }
-            float averageVolume = sum / sampleChunk.Length;
+            var sum = sampleChunk.Sum(Mathf.Abs);
+            var averageVolume = sum / sampleChunk.Length;
 
             if (averageVolume < silenceThreshold)
             {
-                silentTime += VAD_CHECK_INTERVAL;
+                silentTime += VadCheckInterval;
             }
             else
             {
@@ -195,11 +186,11 @@ public class WhisperSTTController : MonoBehaviour
             }
 
             lastSamplePosition = currentSamplePosition;
-            yield return new WaitForSeconds(VAD_CHECK_INTERVAL);
+            yield return new WaitForSeconds(VadCheckInterval);
         }
     }
-    
-    void OnDestroy()
+
+    private void OnDestroy()
     {
         if (_microphoneDevice != null && Microphone.IsRecording(_microphoneDevice))
         {

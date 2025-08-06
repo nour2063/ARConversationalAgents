@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Linq;
 
+// Pulled from https://github.com/Torquoal/AZRAM/
 public class FaceAnimationController : MonoBehaviour
 {
     [Header("Animation Settings")]

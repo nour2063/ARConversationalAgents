@@ -1,4 +1,3 @@
-// Place this in a new C# script file named "WavUtility.cs"
 using System;
 using UnityEngine;
 
@@ -14,15 +13,15 @@ public static class WavUtility
             channels = BitConverter.ToInt16(wavBytes, 22);
             sampleRate = BitConverter.ToInt32(wavBytes, 24);
 
-            int headerOffset = 44; // Standard WAV header size
-            int dataSize = wavBytes.Length - headerOffset;
-            int sampleCount = dataSize / 2; // 2 bytes per 16-bit sample
+            const int headerOffset = 44; // Standard WAV header size
+            var dataSize = wavBytes.Length - headerOffset;
+            var sampleCount = dataSize / 2; // 2 bytes per 16-bit sample
 
-            float[] samples = new float[sampleCount];
+            var samples = new float[sampleCount];
 
-            for (int i = 0; i < sampleCount; i++)
+            for (var i = 0; i < sampleCount; i++)
             {
-                short sampleShort = BitConverter.ToInt16(wavBytes, headerOffset + i * 2);
+                var sampleShort = BitConverter.ToInt16(wavBytes, headerOffset + i * 2);
                 samples[i] = sampleShort / 32768.0f; // Convert to float range -1 to 1
             }
 

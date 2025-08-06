@@ -51,42 +51,19 @@ public class OllamaManager : MonoBehaviour
         Ollama.SetServer(serverIP);
         
         // on-device testing
-        if (serverIP == "http://localhost:11434/")
-        {
-            Ollama.Launch();
-        }
+        if (serverIP == "http://localhost:11434/") Ollama.Launch();
         
         Debug.Log(Ollama.GetServer());
-        
-        // debug
-        // SubmitImage("Hey there!");
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     public void Start()
     {
-        if (webcamManager == null)
-        {
-            Debug.LogError("Webcam manager not set in PassthroughCameraLocal");
-        }
-
-        if (resultText == null)
-        {
-            Debug.LogError("ResultText UI not set in PassthroughCameraLocal");
-        }
-
-        // Editor debug
-        if (image != null)
-        {
-            // SubmitImage("What do you see?");
-            // SubmitImage("What have you got for me? Give me a full rundown!");
-            // SubmitImage("What should I make for dinner?");
-        }
+        if (webcamManager == null) Debug.LogError("Webcam manager not set in PassthroughCameraLocal");
+        if (resultText == null) Debug.LogError("ResultText UI not set in PassthroughCameraLocal");
     }
 
     public async void SubmitImage(string prompt)
     {
-        
         if (processing) return;
         processing = true;
 

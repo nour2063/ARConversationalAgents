@@ -5,9 +5,8 @@ public class AudioController : MonoBehaviour
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip startSound;
     [SerializeField] private AudioClip endSound;
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+
+    private void Start()
     {
         if (audioSource == null)
         {
@@ -25,19 +24,6 @@ public class AudioController : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    public void PlayStartSound()
-    {
-        audioSource.PlayOneShot(startSound);
-    }
-
-    public void PlayEndSound()
-    {
-        audioSource.PlayOneShot(endSound);
-    }
+    public void PlayStartSound() => audioSource.PlayOneShot(startSound);
+    public void PlayEndSound() => audioSource.PlayOneShot(endSound);
 }

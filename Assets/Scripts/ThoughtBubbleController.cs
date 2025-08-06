@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using TMPro;
 using System.Linq;
 
+// Pulled from https://github.com/Torquoal/AZRAM/
 public class ThoughtBubbleController : MonoBehaviour
 {
     [SerializeField] private Transform cameraRig;
