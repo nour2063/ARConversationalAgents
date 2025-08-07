@@ -1970,6 +1970,7 @@ GameObject:
   m_Component:
   - component: {fileID: 390783614}
   - component: {fileID: 390783615}
+  - component: {fileID: 390783616}
   m_Layer: 0
   m_Name: Settings Manager
   m_TagString: Untagged
@@ -2018,6 +2019,28 @@ MonoBehaviour:
     face: 0
     thought: 0
     agentPersonality: 
+  pendingSettings:
+    color: 0
+    sound: 0
+    blob: 0
+    face: 0
+    thought: 0
+    agentPersonality: 
+--- !u!114 &390783616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 390783613}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 875f0669acd5a44daacf0a6c171a6bc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settings: {fileID: 390783615}
+  personas: []
+  latinSquare: {fileID: 4900000, guid: 696a401209c314e4089d9642461d6699, type: 3}
 --- !u!1 &430897793
 GameObject:
   m_ObjectHideFlags: 0
@@ -4973,7 +4996,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1090985332
 Transform:
   m_ObjectHideFlags: 0
@@ -11195,8 +11218,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8286e2bf368be45588597fb822a59ea1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  picovoiceAccessKey: NhPiGZSaTj7uCTiLY16wN/Xe2jZreJ7JcG4QMKIkEYL4YhEtyv9QOQ==
-  wakeWordModelFilename: Hey-Fridge-Mac.ppn
+  picovoiceAccessKey: aWD464U0C25xDM0eaZNq0C/MWWr3U34oowptg9FEPpGbMYYtUq3aWw==
+  wakeWordModelFilename: Hey-Fridge-Android.ppn
   sttController: {fileID: 6888425582269522103}
   commandListenDuration: 5
   onWakeWordDetectedEvent:
@@ -11537,8 +11560,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -11809,7 +11832,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -13185,7 +13208,6 @@ GameObject:
   m_Component:
   - component: {fileID: 318160362499928178}
   - component: {fileID: 6888425582269522103}
-  - component: {fileID: 6548999435134146101}
   m_Layer: 0
   m_Name: WhisperSTT Manager
   m_TagString: Untagged
@@ -13421,38 +13443,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2205260534524336438, guid: d46bf1e047ddf4bdcaa3b92ebde4ad82, type: 3}
   m_PrefabInstance: {fileID: 6518755757451549256}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &6548999435134146101
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6340386678484786922}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d9370225a2ca94276b870d5f87b0db55, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  logLevel: 1
-  modelPath: ggml-base.bin
-  isModelPathInStreamingAssets: 1
-  initOnAwake: 1
-  language: en
-  translateToEnglish: 0
-  strategy: 0
-  noContext: 1
-  singleSegment: 0
-  enableTokens: 0
-  initialPrompt: 
-  stepSec: 3
-  keepSec: 0.2
-  lengthSec: 10
-  updatePrompt: 1
-  dropOldBuffer: 0
-  useVad: 1
-  tokensTimestamps: 0
-  speedUp: 0
-  audioCtx: 0
 --- !u!225 &6638178164062077863
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -13495,7 +13485,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3b057da02c114e83b847122405c9759, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  whisperManager: {fileID: 6548999435134146101}
+  serverIPAddress: makatea.dcs.gla.ac.uk
+  serverPort: 5000
+  sttApiEndpoint: /transcribe
   speaker: {fileID: 5529880099724506688}
   onListeningStartEvent:
     m_PersistentCalls:
@@ -14356,7 +14348,7 @@ MonoBehaviour:
   talkingHoverHeightMultiplier: 0.3
   talkingBaseBreathSpeed: 2
   talkingRandomBreathFluctuation: 0.01
-  talkingRandomnessFrequency: 5
+  talkingRandomnessFrequency: 1
   isSpeaking: 0
   speaker: {fileID: 5529880099724506688}
 --- !u!114 &8103410028456414854
@@ -14374,6 +14366,7 @@ MonoBehaviour:
   webcamManager: {fileID: 205729070}
   feedbackManager: {fileID: 1111958130}
   speaker: {fileID: 5529880099724506688}
+  model: gemma3NS
   serverIP: http://makatea.dcs.gla.ac.uk:11435/
   initialPrompt: "The following is a system message informing you on how to behave:\n\nYou
     are a conversational agent embodying an affective refridgerator. Queries will

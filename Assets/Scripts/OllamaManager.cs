@@ -14,6 +14,7 @@ public class OllamaManager : MonoBehaviour
     [SerializeField] private CoquiTTSController speaker;
 
     [Header("Vision Model")] 
+    [SerializeField] private string model = "gemma3:12b";
     [SerializeField] private string serverIP = "http://localhost:11434/";
     [TextArea(30,10)]
     [SerializeField] private string initialPrompt = "You are a helpful assistant.";
@@ -111,7 +112,7 @@ public class OllamaManager : MonoBehaviour
         {
             resultText.text = "making chat request...";
             response =
-                await Ollama.Generate("gemma3:12b", fullGemmaPrompt, images: imagesToSend);
+                await Ollama.Generate(model, fullGemmaPrompt, images: imagesToSend);
             
             Debug.Log("Ollama response ok!");
             Debug.Log(response);

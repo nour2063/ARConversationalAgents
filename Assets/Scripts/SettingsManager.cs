@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 [System.Serializable]
@@ -48,7 +49,7 @@ public class SettingsManager : MonoBehaviour
 
     // --- State Management ---
     public SettingsData activeSettings;  // The settings currently used by the application.
-    private SettingsData _pendingSettings; // Temporary settings modified by the UI.
+    public SettingsData pendingSettings; // Temporary settings modified by the UI.
     
     private void Awake()
     {
@@ -78,11 +79,11 @@ public class SettingsManager : MonoBehaviour
         if (activeToggle != null)
         {
             // Set the personality in our pending settings based on the GameObject's name.
-            _pendingSettings.agentPersonality = activeToggle.gameObject.name;
+            pendingSettings.agentPersonality = activeToggle.gameObject.name;
         }
 
         // Now, commit all pending settings to be the new active settings.
-        activeSettings = _pendingSettings;
+        activeSettings = pendingSettings;
         
         // Finally, save the new active settings to disk.
         SaveSettings();
@@ -100,26 +101,26 @@ public class SettingsManager : MonoBehaviour
 
     // --- Methods for individual On/Off Toggles ---
     // These methods modify the 'pendingSettings' only.
-    public void SetColor(bool isEnabled) => _pendingSettings.color = isEnabled; 
-    public void SetSound(bool isEnabled) => _pendingSettings.sound = isEnabled;
-    public void SetBlob(bool isEnabled) => _pendingSettings.blob = isEnabled;
-    public void SetFace(bool isEnabled) => _pendingSettings.face = isEnabled;
-    public void SetThought(bool isEnabled) => _pendingSettings.thought = isEnabled;
+    public void SetColor(bool isEnabled) => pendingSettings.color = isEnabled; 
+    public void SetSound(bool isEnabled) => pendingSettings.sound = isEnabled;
+    public void SetBlob(bool isEnabled) => pendingSettings.blob = isEnabled;
+    public void SetFace(bool isEnabled) => pendingSettings.face = isEnabled;
+    public void SetThought(bool isEnabled) => pendingSettings.thought = isEnabled;
     
     private void UpdateUIForms()
     {
         // Update the simple on/off toggles.
-        colorToggle.isOn = _pendingSettings.color;
-        soundToggle.isOn = _pendingSettings.sound;
-        blobToggle.isOn = _pendingSettings.blob;
-        faceToggle.isOn = _pendingSettings.face;
-        thoughtToggle.isOn = _pendingSettings.thought;
+        colorToggle.isOn = pendingSettings.color;
+        soundToggle.isOn = pendingSettings.sound;
+        blobToggle.isOn = pendingSettings.blob;
+        faceToggle.isOn = pendingSettings.face;
+        thoughtToggle.isOn = pendingSettings.thought;
 
         // Update the personality radio buttons.
         foreach (var toggle in personalityToggleGroup.GetComponentsInChildren<Toggle>())
         {
             // If this toggle's name matches our saved setting, make it active.
-            if (toggle.gameObject.name != _pendingSettings.agentPersonality) continue;
+            if (toggle.gameObject.name != pendingSettings.agentPersonality) continue;
             toggle.isOn = true;
             break; 
         }
@@ -149,6 +150,6 @@ public class SettingsManager : MonoBehaviour
 
         // On initial load, both the active and pending states are set to the loaded data.
         activeSettings = loadedData;
-        _pendingSettings = loadedData;
+        pendingSettings = loadedData;
     }
 }

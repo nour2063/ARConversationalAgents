@@ -1,15 +1,19 @@
 using UnityEngine;
+using UnityEngine.Networking;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
-using Whisper;
 
 public class WhisperSTTController : MonoBehaviour
 {
+    [Header("Configuration")]
+    [SerializeField] private string serverIPAddress = "localhost";
+    [SerializeField] private int serverPort = 5000;
+    [SerializeField] private string sttApiEndpoint = "/transcribe";
+
     [Header("References")]
-    [SerializeField] private WhisperManager whisperManager;
     [SerializeField] private CoquiTTSController speaker;
 
     // C# Events for code subscribers
@@ -22,7 +26,6 @@ public class WhisperSTTController : MonoBehaviour
     [SerializeField] private UnityEvent<string> onTranscriptionSuccessEvent;
     [SerializeField] private UnityEvent onTranscriptionFailedEvent;
 
-    [FormerlySerializedAs("SampleRate")]
     [Header("Microphone Settings")]
     [SerializeField] private int sampleRate = 16000;
     [SerializeField] private int maxRecordingLengthSeconds = 10;
@@ -79,7 +82,7 @@ public class WhisperSTTController : MonoBehaviour
         Invoke(nameof(StopListeningForCommand), duration);
     }
 
-    public async void StopListeningForCommand()
+    public void StopListeningForCommand()
     {
         if (!_isRecordingCommand) return; 
 
@@ -100,56 +103,59 @@ public class WhisperSTTController : MonoBehaviour
         {
             Debug.LogWarning("WhisperSTTController: Recorded audio clip is empty. Not transcribing.");
             onTranscriptionFailedEvent?.Invoke();
-            // This path should also signal the timeout to prevent a stuck state
             OnCommandListenTimeout?.Invoke(); 
             return;
         }
         
-        var samples = new float[_recordingClip.samples * _recordingClip.channels];
+        var samples = new float[micPosition * _recordingClip.channels];
         _recordingClip.GetData(samples, 0);
-        var trimmedSamples = new float[micPosition * _recordingClip.channels];
-        Array.Copy(samples, trimmedSamples, trimmedSamples.Length);
-        var trimmedClip = AudioClip.Create("TrimmedRecording", micPosition, _recordingClip.channels, _recordingClip.frequency, false);
-        trimmedClip.SetData(trimmedSamples, 0);
+        
+        var wavData = WavUtility.ConvertToWav(samples, _recordingClip.channels, _recordingClip.frequency);
+        
+        StartCoroutine(TranscribeAudioWithAPI(wavData));
+        
+        Destroy(_recordingClip);
+        _recordingClip = null;
+    }
+    
+    private IEnumerator TranscribeAudioWithAPI(byte[] audioData)
+    {
+        var url = $"http://{serverIPAddress}:{serverPort}{sttApiEndpoint}";
+        
+        var form = new List<IMultipartFormSection>();
+        form.Add(new MultipartFormFileSection("file", audioData, "audio.wav", "audio/wav"));
 
-        try
+        using (UnityWebRequest www = UnityWebRequest.Post(url, form))
         {
-            Debug.Log("WhisperSTTController: Passing audio to WhisperManager for transcription.");
-            var result = await whisperManager.GetTextAsync(trimmedClip);
+            Debug.Log($"WhisperSTTController: Uploading audio to {url} for transcription...");
+            yield return www.SendWebRequest();
 
-            if (result != null && !string.IsNullOrEmpty(result.Result))
+            if (www.result != UnityWebRequest.Result.Success)
             {
-                var cleanedText = result.Result.Replace("[BLANK_AUDIO]", "").Trim();
-
-                if (!string.IsNullOrEmpty(cleanedText))
-                {
-                    Debug.Log($"Whisper Transcribed (Cleaned): \"{cleanedText}\"");
-                    OnCommandTranscribed?.Invoke(cleanedText);
-                    onTranscriptionSuccessEvent?.Invoke(cleanedText);
-                }
-                else
-                {
-                    Debug.LogWarning($"Transcription result contained only non-speech tokens. Raw: \"{result.Result}\"");
-                    onTranscriptionFailedEvent?.Invoke();
-                }
+                Debug.LogError($"STT Request failed: {www.error}");
+                Debug.LogError($"Response: {www.downloadHandler.text}");
+                onTranscriptionFailedEvent?.Invoke();
             }
             else
             {
-                var rawResult = (result == null || string.IsNullOrEmpty(result.Result)) ? "NULL_OR_EMPTY" : result.Result;
-                Debug.LogWarning($"WhisperSTTController: Transcription failed. Raw result from Whisper: \"{rawResult}\"");
-                onTranscriptionFailedEvent?.Invoke();
+                var response = JsonUtility.FromJson<TranscriptionResponse>(www.downloadHandler.text);
+                var transcribedText = response.text?.Trim();
+
+                if (!string.IsNullOrEmpty(transcribedText))
+                {
+                    Debug.Log($"Server Transcribed: \"{transcribedText}\"");
+                    OnCommandTranscribed?.Invoke(transcribedText);
+                    onTranscriptionSuccessEvent?.Invoke(transcribedText);
+                }
+                else
+                {
+                    Debug.LogWarning("Server transcription result was empty.");
+                    onTranscriptionFailedEvent?.Invoke();
+                }
             }
         }
-        catch (Exception e)
-        {
-            Debug.LogError($"WhisperSTTController: Transcription failed: {e.Message}");
-            onTranscriptionFailedEvent?.Invoke();
-        }
-        finally
-        {
-            OnCommandListenTimeout?.Invoke();
-            Destroy(trimmedClip); 
-        }
+        
+        OnCommandListenTimeout?.Invoke();
     }
     
     private IEnumerator MonitorVoiceActivity()
@@ -164,7 +170,8 @@ public class WhisperSTTController : MonoBehaviour
         {
             var currentSamplePosition = Microphone.GetPosition(_microphoneDevice);
             
-            _recordingClip.GetData(sampleChunk, lastSamplePosition);
+            var readPos = (lastSamplePosition < currentSamplePosition) ? lastSamplePosition : 0;
+            _recordingClip.GetData(sampleChunk, readPos);
             
             var sum = sampleChunk.Sum(Mathf.Abs);
             var averageVolume = sum / sampleChunk.Length;
@@ -202,5 +209,11 @@ public class WhisperSTTController : MonoBehaviour
     public bool IsListeningForCommand()
     {
         return _isRecordingCommand;
+    }
+    
+    [Serializable]
+    private class TranscriptionResponse
+    {
+        public string text;
     }
 }

@@ -1,0 +1,14 @@
+none,face,blob,color+blob,color+face,sound+color+blob,sound+color+face
+color+face,sound+color+face,blob,sound+color+blob,none,color+blob,face
+color+blob,sound+color+blob,face,sound+color+face,none,color+face,blob
+none,blob,face,color+face,color+blob,sound+color+face,sound+color+blob
+sound+color+face,color+face,sound+color+blob,blob,color+blob,none,face
+color+blob,face,sound+color+blob,none,sound+color+face,blob,color+face
+blob,none,color+face,face,sound+color+face,color+blob,sound+color+blob
+sound+color+face,sound+color+blob,color+face,color+blob,blob,face,none
+face,color+blob,none,sound+color+blob,blob,sound+color+face,color+face
+blob,color+face,none,sound+color+face,face,sound+color+blob,color+blob
+sound+color+blob,sound+color+face,color+blob,color+face,face,blob,none
+face,none,color+blob,blob,sound+color+blob,color+face,sound+color+face
+color+face,blob,sound+color+face,none,sound+color+blob,face,color+blob
+sound+color+blob,color+blob,sound+color+face,face,color+face,none,blob

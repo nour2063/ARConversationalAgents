@@ -1,9 +1,9 @@
 using System;
+using System.Text;
 using UnityEngine;
 
 public static class WavUtility
 {
-    // This is the thread-safe method for background processing
     public static float[] GetSamplesFromWav(byte[] wavBytes, out int channels, out int sampleRate)
     {
         // Basic WAV header parsing
@@ -34,5 +34,33 @@ public static class WavUtility
             sampleRate = 0;
             return null;
         }
+    }
+
+    public static byte[] ConvertToWav(float[] samples, int channels, int frequency)
+    {
+        using var memoryStream = new System.IO.MemoryStream();
+        using var writer = new System.IO.BinaryWriter(memoryStream, Encoding.UTF8);
+        // WAV header
+        writer.Write(Encoding.UTF8.GetBytes("RIFF"));
+        writer.Write(36 + samples.Length * 2);
+        writer.Write(Encoding.UTF8.GetBytes("WAVE"));
+        writer.Write(Encoding.UTF8.GetBytes("fmt "));
+        writer.Write(16);
+        writer.Write((short)1); // Audio format 1 = PCM
+        writer.Write((short)channels);
+        writer.Write(frequency);
+        writer.Write(frequency * channels * 2); // Byte rate
+        writer.Write((short)(channels * 2)); // Block align
+        writer.Write((short)16); // Bits per sample
+        writer.Write(Encoding.UTF8.GetBytes("data"));
+        writer.Write(samples.Length * 2);
+
+        // Convert float samples to 16-bit PCM
+        foreach (var sample in samples)
+        {
+            writer.Write((short)(sample * 32767));
+        }
+
+        return memoryStream.ToArray();
     }
 }
