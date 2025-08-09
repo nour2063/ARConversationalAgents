@@ -22,10 +22,13 @@ public class CoquiTTSController : MonoBehaviour
     [SerializeField] private float listeningDuration = 10.0f;
     
     [SerializeField] private WakeWordDetector wakeWordDetector;
+    [SerializeField] private GameObject popup;
 
     private AudioSource _audioSource;
     private bool _isSpeaking;
     private bool _isListening;
+    private int _interactionCount;
+    
     private readonly Queue<SpeechRequest> _speechQueue = new ();
 
     private void Awake()
@@ -104,6 +107,9 @@ public class CoquiTTSController : MonoBehaviour
         _isSpeaking = false;
         
         ListeningPeriod();
+        
+        _interactionCount++;
+        if (_interactionCount > 1) popup.SetActive(true);
     }
 
     public void HandleCollision()

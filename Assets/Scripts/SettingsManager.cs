@@ -34,12 +34,9 @@ public class SettingsManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private FeedbackManager fridge;
     
-    // --- Singleton Instance ---
     private static SettingsManager Instance { get; set; }
 
-    // --- UI References ---
     [Header("UI Element References")]
-    [Tooltip("Drag the UI components from your Hierarchy here.")]
     public Toggle colorToggle;
     public Toggle soundToggle;
     public Toggle blobToggle;
@@ -47,9 +44,9 @@ public class SettingsManager : MonoBehaviour
     public Toggle thoughtToggle;
     public ToggleGroup personalityToggleGroup;
 
-    // --- State Management ---
-    public SettingsData activeSettings;  // The settings currently used by the application.
-    public SettingsData pendingSettings; // Temporary settings modified by the UI.
+    [Header("State Management")]
+    public SettingsData activeSettings;
+    public SettingsData pendingSettings;
     
     private void Awake()
     {
@@ -62,7 +59,7 @@ public class SettingsManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            LoadSettings(); // Load saved settings on startup.
+            // LoadSettings(); // Load saved settings on startup.
         }
     }
 
@@ -86,10 +83,10 @@ public class SettingsManager : MonoBehaviour
         activeSettings = pendingSettings;
         
         // Finally, save the new active settings to disk.
-        SaveSettings();
-
+        // SaveSettings();
+        
         Debug.Log("Settings Applied and Saved! Personality is now: " + activeSettings.agentPersonality);
-        fridge.Reset();
+        if (fridge != null) fridge.Reset();
         
         Invoke(nameof(FindNewFridge), 1f);
     }

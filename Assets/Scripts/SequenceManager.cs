@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class SequenceManager : MonoBehaviour
@@ -7,9 +8,31 @@ public class SequenceManager : MonoBehaviour
     [SerializeField] private string[] personas;
     [SerializeField] private TextAsset latinSquare;
 
+    [Header("Objects")] 
+    [SerializeField] private GameObject wakeWordDetector;
+    [SerializeField] private GameObject ttsManager;
+    [SerializeField] private GameObject fridge;
+
+    [Header("Dialog")]
+    [SerializeField] private GameObject popup;
+    [SerializeField] private TextMeshProUGUI dialogTitle;
+    [SerializeField] private TextMeshProUGUI dialogBody;
+    [SerializeField] private string title;
+    [SerializeField] private string body;
+    [SerializeField] private GameObject selectedPersona;
+    [SerializeField] private bool debug = true;
+
     private string[] _sequence;
     private int _currentPhase;
     private int _currentPersona;
+
+    // todo make GUI for participant ID
+    private void Start()
+    {
+        GenerateSequence(0);
+        
+        Invoke(nameof(HideFridge), 0.1f);
+    }
     
     public void GenerateSequence(int idx)
     {
@@ -22,8 +45,10 @@ public class SequenceManager : MonoBehaviour
             var line = lines[idx].Trim();
             _sequence =  line.Split(',');
         }
-
-        Debug.LogWarning($"Row index {idx} is out of bounds. The file has {lines.Length} lines.");
+        else
+        {
+            Debug.LogWarning($"Row index {idx} is out of bounds. The file has {lines.Length} lines.");
+        }
     }
 
     private void NextPhase()
@@ -38,16 +63,16 @@ public class SequenceManager : MonoBehaviour
             switch (option)
             {
                 case "color":
-                    settings.pendingSettings.color = true;
+                    settings.SetColor(true);
                     break;
                 case "sound":
-                    settings.pendingSettings.sound = true;
+                    settings.SetSound(true);
                     break;
                 case "blob":
-                    settings.pendingSettings.blob = true;
+                    settings.SetBlob(true);
                     break;
                 case "face":
-                    settings.pendingSettings.face = true;
+                    settings.SetFace(true);
                     break;
             }
         }
@@ -59,21 +84,37 @@ public class SequenceManager : MonoBehaviour
     private void NextPersonality()
     {
         if (_currentPersona >= personas.Length) return;
-        settings.pendingSettings.agentPersonality = personas[_currentPersona];
+        selectedPersona.name = personas[_currentPersona];
         settings.ApplyChanges();
         _currentPersona++;
     }
 
     public void NextTask()
     {
-        if (_currentPersona < personas.Length)
+        if (!wakeWordDetector.activeInHierarchy)
+        {
+            dialogTitle.text = title;
+            dialogBody.text = body;
+        
+            wakeWordDetector.SetActive(true);
+            ttsManager.SetActive(true);
+            fridge.SetActive(true);
+        }
+        
+        if (!debug) popup.SetActive(false);
+        
+        if (_currentPersona != personas.Length - 1)
         {
             NextPersonality();
         }
         else
         {
-            _currentPersona = 0;
             NextPhase();
         }
+    }
+
+    private void HideFridge()
+    {
+        fridge.SetActive(false);
     }
 }
