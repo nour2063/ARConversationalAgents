@@ -59,7 +59,7 @@ public class SettingsManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            // LoadSettings(); // Load saved settings on startup.
+            LoadSettings(); // Load saved settings on startup.
         }
     }
 
@@ -83,7 +83,7 @@ public class SettingsManager : MonoBehaviour
         activeSettings = pendingSettings;
         
         // Finally, save the new active settings to disk.
-        // SaveSettings();
+        SaveSettings();
         
         Debug.Log("Settings Applied and Saved! Personality is now: " + activeSettings.agentPersonality);
         if (fridge != null) fridge.Reset();

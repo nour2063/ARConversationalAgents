@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SequenceManager : MonoBehaviour
@@ -7,6 +8,7 @@ public class SequenceManager : MonoBehaviour
     [SerializeField] private SettingsManager settings;
     [SerializeField] private string[] personas;
     [SerializeField] private TextAsset latinSquare;
+    [SerializeField] private CoquiTTSController speaker;
 
     [Header("Objects")] 
     [SerializeField] private GameObject wakeWordDetector;
@@ -22,6 +24,10 @@ public class SequenceManager : MonoBehaviour
     [SerializeField] private GameObject selectedPersona;
     [SerializeField] private bool debug = true;
 
+    [Header("UI")] 
+    [SerializeField] private TMP_InputField participantID;
+    [SerializeField] private GameObject idPopup;
+
     private string[] _sequence;
     private int _currentPhase;
     private int _currentPersona;
@@ -29,13 +35,14 @@ public class SequenceManager : MonoBehaviour
     // todo make GUI for participant ID
     private void Start()
     {
-        GenerateSequence(0);
-        
         Invoke(nameof(HideFridge), 0.1f);
     }
     
-    public void GenerateSequence(int idx)
+    public void GenerateSequence()
     {
+        if (string.IsNullOrWhiteSpace(participantID.text)) return;
+        var idx = int.Parse(participantID.text);
+        
         if (latinSquare == null) return;
         
         var lines = latinSquare.text.Trim().Split('\n');
@@ -44,6 +51,9 @@ public class SequenceManager : MonoBehaviour
         {
             var line = lines[idx].Trim();
             _sequence =  line.Split(',');
+            
+            idPopup.SetActive(false);
+            popup.SetActive(true);
         }
         else
         {
@@ -77,38 +87,40 @@ public class SequenceManager : MonoBehaviour
             }
         }
         
+        selectedPersona.name = personas[0];
         settings.ApplyChanges();
         _currentPhase++;
-    }
-
-    private void NextPersonality()
-    {
-        if (_currentPersona >= personas.Length) return;
-        selectedPersona.name = personas[_currentPersona];
-        settings.ApplyChanges();
         _currentPersona++;
     }
 
     public void NextTask()
     {
-        if (!wakeWordDetector.activeInHierarchy)
+        if (_currentPhase == 0 && _currentPersona == 0)
         {
-            dialogTitle.text = title;
-            dialogBody.text = body;
-        
             wakeWordDetector.SetActive(true);
             ttsManager.SetActive(true);
             fridge.SetActive(true);
+    
+            dialogTitle.text = title;
+            dialogBody.text = body;
+            
+            NextPhase();
+            return;
         }
+        
+        speaker.StopTalking();
         
         if (!debug) popup.SetActive(false);
         
-        if (_currentPersona != personas.Length - 1)
+        if (_currentPersona < personas.Length)
         {
-            NextPersonality();
+            selectedPersona.name = personas[_currentPersona];
+            settings.ApplyChanges();
+            _currentPersona++;
         }
         else
         {
+            _currentPersona = 0;
             NextPhase();
         }
     }

@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using PassthroughCameraSamples;
 using TMPro;
 using ollama;
@@ -63,71 +64,90 @@ public class OllamaManager : MonoBehaviour
         if (resultText == null) Debug.LogError("ResultText UI not set in PassthroughCameraLocal");
     }
 
-    public async void SubmitImage(string prompt)
-    {
-        if (processing) return;
-        processing = true;
+public async void SubmitImage(string prompt)
+{
+    if (processing) return;
+    processing = true;
 
-        var userMessage = new Message("user", prompt);
-        
-        if (_chatHistory.Count == 0)
-        {
-            userMessage.Content = initialPrompt + settings.activeSettings.agentPersonality + "\n------------------\nThe following is the user's initial message:" + "\n \n" + prompt;
-        }
-        
+    // --- 1. Prepare the content for this turn ---
+    var finalUserContent = prompt;
+    var imageTokens = "";
+    Texture2D[] imagesToSend = null;
+
+    // Check if this is the very first user turn to prepend the main system prompt
+    if (_chatHistory.Count == 0)
+    {
+        finalUserContent = $"{initialPrompt}{settings.activeSettings.agentPersonality}\n\n------------------" +
+                           $"This is the user's first message:\n\n{finalUserContent}";
+    }
+
+    // Handle image-specific modes and turn-specific instructions
+    if (image != null)
+    {
         if (speaker.IsListening() && _comparing)
         {
-            userMessage.Content = comparePrompt + "\n \n" + prompt;
-        } 
-        else if (speaker.IsListening())
-        {
-            userMessage.Content = responsePrompt + "\n \n" + prompt;
+            // Prepend the "compare" instruction and prepare two image tokens
+            finalUserContent = $"{comparePrompt}\n\n{finalUserContent}";
+            imageTokens = "<image>\n<image>\n";
+            imagesToSend = new[] { image, image2 };
         }
-        
-        // building user's current message
-
-        _chatHistory.Add(userMessage);
-        
-        // https://ai.google.dev/gemma/docs/core/prompt-structure
-        var fullGemmaPrompt = _chatHistory.Aggregate("", (current, message) => current + message.Role switch
+        else 
         {
-            "model" => $"<start_of_turn>model\n{message.Content}<end_of_turn>\n",
-            _ => $"<start_of_turn>user\n{message.Content}<end_of_turn>\n",
-        });
-
-        fullGemmaPrompt += "<start_of_turn>model\n";
-        
-        Debug.Log(fullGemmaPrompt);
-
-        Texture2D[] imagesToSend = null;
-
-        // Editor debug
-        if (image != null)
-        {
-            imagesToSend = _comparing ? new [] {image, image2} : new [] { image };
+            // Handle the "quick reply" instruction if applicable
+            if (speaker.IsListening())
+            {
+                finalUserContent = $"{responsePrompt}\n\n{finalUserContent}";
+            }
+            imageTokens = "<image>\n";
+            imagesToSend = new[] { image };
         }
-
-        string response;
-        try
-        {
-            resultText.text = "making chat request...";
-            response =
-                await Ollama.Generate(model, fullGemmaPrompt, images: imagesToSend);
-            
-            Debug.Log("Ollama response ok!");
-            Debug.Log(response);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Ollama API Error: {e.Message}");
-            resultText.text = $"Ollama Error: {e.Message}. Check console.";
-            processing = false;
-            return;
-        }
-        
-        _chatHistory.Add(new Message("model", response));
-        feedbackManager.ParseResponse(response);
     }
+
+    // Create the final user message object for the history
+    var userMessage = new Message("user", $"{imageTokens}{finalUserContent}");
+    _chatHistory.Add(userMessage);
+
+    // --- 2. Build the entire prompt string from history ---
+    // Tokenization based on https://huggingface.co/openbmb/MiniCPM-Llama3-V-2_5
+    var promptBuilder = new StringBuilder();
+    foreach (var message in _chatHistory)
+    {
+        switch (message.Role)
+        {
+            case "user":
+                promptBuilder.Append("<s>[INST] ").Append(message.Content).Append(" [/INST]");
+                break;
+            case "assistant":
+                promptBuilder.Append(message.Content).Append("</s>");
+                break;
+        }
+    }
+    var fullPrompt = promptBuilder.ToString();
+
+    // --- 3. Send the request to Ollama ---
+    string response;
+    try
+    {
+        resultText.text = "making chat request...";
+        response = await Ollama.Generate(model, fullPrompt, images: imagesToSend);
+        Debug.Log("Ollama response ok!");
+        Debug.Log(response);
+    }
+    catch (Exception e)
+    {
+        Debug.LogError($"Ollama API Error: {e.Message}");
+        resultText.text = $"Ollama Error: {e.Message}. Check console.";
+        // If the request fails, remove the user message added
+        _chatHistory.Remove(userMessage);
+        processing = false;
+        return;
+    }
+
+    // --- 4. Handle the response ---
+    _chatHistory.Add(new Message("assistant", response));
+    feedbackManager.ParseResponse(response);
+    processing = false;
+}
 
     public void CaptureImage(int idx = 0)
     {

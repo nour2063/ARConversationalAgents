@@ -130,12 +130,14 @@ public class FeedbackManager : MonoBehaviour
         
         try
         {
-            jsonResponse = JObject.Parse(response[8..^3]);
+            jsonResponse = JObject.Parse(response);
         }
         catch
         {
             llm.processing = false;
-            return; // no emotion to give, error parsing JSON output
+            speaker.Speak("");
+            Debug.LogWarning("Unable to interpret...");
+            return; // no emotion or message to give; error parsing JSON output
         }
 
         var emotion = jsonResponse["emotion"]?.ToObject<float[]>();

@@ -112,6 +112,11 @@ public class CoquiTTSController : MonoBehaviour
         if (_interactionCount > 1) popup.SetActive(true);
     }
 
+    public void StopTalking()
+    {
+        _audioSource.Stop();
+    }
+
     public void HandleCollision()
     {
         ListeningPeriod();
