@@ -493,6 +493,8 @@ public class FeedbackManager : MonoBehaviour
         newFridge.transform.localPosition = localPosition;
         newFridge.transform.localRotation = localRotation;
         newFridge.transform.localScale = localScale;
+        
+        newFridge.SetActive(true);
 
         Destroy(fridgeEntity);
         llm.ClearChatHistory();

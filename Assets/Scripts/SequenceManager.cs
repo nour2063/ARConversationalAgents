@@ -1,5 +1,6 @@
+using System.IO;
+using System.Text;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class SequenceManager : MonoBehaviour
@@ -27,10 +28,18 @@ public class SequenceManager : MonoBehaviour
     [Header("UI")] 
     [SerializeField] private TMP_InputField participantID;
     [SerializeField] private GameObject idPopup;
+    [SerializeField] private GameObject surveyPopup;
+    [SerializeField] private UnityEngine.UI.Slider pleasure;
+    [SerializeField] private UnityEngine.UI.Slider arousal;
+    [SerializeField] private UnityEngine.UI.Slider dominance;
+    [SerializeField] private TextMeshProUGUI emotionalState;
 
     private string[] _sequence;
     private int _currentPhase;
     private int _currentPersona;
+    private bool _firstStart = true;
+    
+    private const string Header = "Condition,Emotion,Pleasure,Arousal,Dominance,EmotionalState";
 
     // todo make GUI for participant ID
     private void Start()
@@ -41,7 +50,9 @@ public class SequenceManager : MonoBehaviour
     public void GenerateSequence()
     {
         if (string.IsNullOrWhiteSpace(participantID.text)) return;
-        var idx = int.Parse(participantID.text);
+        var idx = int.Parse(participantID.text) % 14; // number of combinations in latin sqare
+        
+        Debug.Log("Participant number: " + participantID.text + ", Sequence ID: " + idx);
         
         if (latinSquare == null) return;
         
@@ -89,13 +100,11 @@ public class SequenceManager : MonoBehaviour
         
         selectedPersona.name = personas[0];
         settings.ApplyChanges();
-        _currentPhase++;
-        _currentPersona++;
     }
 
     public void NextTask()
     {
-        if (_currentPhase == 0 && _currentPersona == 0)
+        if (_firstStart)
         {
             wakeWordDetector.SetActive(true);
             ttsManager.SetActive(true);
@@ -104,29 +113,81 @@ public class SequenceManager : MonoBehaviour
             dialogTitle.text = title;
             dialogBody.text = body;
             
+            _firstStart = false;
             NextPhase();
             return;
         }
         
         speaker.StopTalking();
         
-        if (!debug) popup.SetActive(false);
-        
-        if (_currentPersona < personas.Length)
-        {
-            selectedPersona.name = personas[_currentPersona];
-            settings.ApplyChanges();
-            _currentPersona++;
-        }
-        else
-        {
-            _currentPersona = 0;
-            NextPhase();
-        }
+        popup.SetActive(false);
+        ShowSurvey();
     }
 
     private void HideFridge()
     {
         fridge.SetActive(false);
+    }
+
+    private void ShowSurvey()
+    {
+        surveyPopup.SetActive(true);
+        settings.fridge.transform.parent.gameObject.SetActive(false);
+    }
+    
+    public void WriteFeedbackToFile()
+    {
+        // 1. Define the file path using the participant's ID
+        var filePath = Path.Combine(Application.persistentDataPath, $"{participantID.text}.csv");
+
+        // 2. Check if the file exists to determine if we need to add a header
+        var fileExists = File.Exists(filePath);
+
+        try
+        {
+            // Use a StreamWriter to append data. 'true' enables append mode.
+            using (var writer = new StreamWriter(filePath, true, Encoding.UTF8))
+            {
+                // If the file is new, write the header first
+                if (!fileExists)
+                {
+                    writer.WriteLine(Header);
+                }
+
+                // 3. Create the new data row
+                var dataRow = $"{_sequence[_currentPhase]},{personas[_currentPersona]},{pleasure.value},{arousal.value},{dominance.value},{emotionalState.text}";
+
+                // 4. Write the new row to the file
+                writer.WriteLine(dataRow);
+            }
+
+            surveyPopup.SetActive(false);
+            pleasure.value = 1;
+            arousal.value = 1;
+            dominance.value = 1;
+            emotionalState.text = "Select Emotion";
+            
+            Debug.Log($"<color=lime>Successfully wrote to: {filePath}</color>");
+            
+            if (_currentPersona < personas.Length - 1)
+            {
+                _currentPersona++;
+                selectedPersona.name = personas[_currentPersona];
+                settings.ApplyChanges();
+            }
+            else
+            {
+                _currentPersona = 0;
+                NextPhase();
+                _currentPhase++;
+            }
+            
+            if (debug) popup.SetActive(true);
+            settings.fridge.transform.parent.gameObject.SetActive(true);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Failed to write to CSV. Error: {e.Message}");
+        }
     }
 }
